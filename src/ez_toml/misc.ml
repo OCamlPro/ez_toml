@@ -1,0 +1,29 @@
+(**************************************************************************)
+(*                                                                        *)
+(*  Copyright (c) 2023 OCamlPro SAS                                       *)
+(*                                                                        *)
+(*  All rights reserved.                                                  *)
+(*  This file is distributed under the terms of the GNU Lesser General    *)
+(*  Public License version 2.1, with the special exception on linking     *)
+(*  described in the LICENSE.md file in the root directory.               *)
+(*                                                                        *)
+(*                                                                        *)
+(**************************************************************************)
+
+open Types
+
+let noloc = { file = "";
+              line_begin = 0;
+              line_end = 0;
+              char_begin = 0;
+              char_end = 0 }
+
+let node ?(pos=max_int) ?(format=Any) ?(loc=noloc) ?(before=[]) ?after
+    value =
+  { node_loc = loc ;
+    node_comment_before = before;
+    node_comment_after = after;
+    node_value = value ;
+    node_format = format ;
+    node_pos = pos;
+  }

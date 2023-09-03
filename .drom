@@ -1,0 +1,244 @@
+# Keep this file in your GIT repo to help drom track generated files
+# begin version
+version:0.9.0
+# end version
+
+# hash of toml configuration files
+# used for generation of all files
+c7840e23beba769850c5f1e75cc767b7:.
+# end context for .
+
+# begin context for .github/workflows/workflow.yml
+# file .github/workflows/workflow.yml
+19d4657ee9b94d7ef77f1a30c0b401dd:.github/workflows/workflow.yml
+# end context for .github/workflows/workflow.yml
+
+# begin context for .gitignore
+# file .gitignore
+efebb67245de1ba2ce8f2c70ec77833c:.gitignore
+# end context for .gitignore
+
+# begin context for .ocamlformat
+# file .ocamlformat
+a021399591b7aeb6f2e2854b4b8395c9:.ocamlformat
+# end context for .ocamlformat
+
+# begin context for .ocamlformat-ignore
+# file .ocamlformat-ignore
+c8f70450e7d78c0387644864ffe8cbd5:.ocamlformat-ignore
+# end context for .ocamlformat-ignore
+
+# begin context for .ocp-indent
+# file .ocp-indent
+6048407431b8d9baf725ae5365d4c2f2:.ocp-indent
+# end context for .ocp-indent
+
+# begin context for CHANGES.md
+# file CHANGES.md
+db0126b9266fcb9955cd5a9b69b0da2a:CHANGES.md
+# end context for CHANGES.md
+
+# begin context for LICENSE.md
+# file LICENSE.md
+e31b19b601ab25353ef16d67127735f1:LICENSE.md
+# end context for LICENSE.md
+
+# begin context for Makefile
+# file Makefile
+9693edbcef3baf6a1669fc8a43c50248:Makefile
+# end context for Makefile
+
+# begin context for README.md
+# file README.md
+cc6150df8ab3715d54935e88afa6d37e:README.md
+# end context for README.md
+
+# begin context for docs/README.txt
+# file docs/README.txt
+bfbacf00053bb9ab2a6e2ce94ed4a642:docs/README.txt
+# end context for docs/README.txt
+
+# begin context for docs/doc/index.html
+# file docs/doc/index.html
+f3331c0b225fd51c5aa8ac3a9ccae307:docs/doc/index.html
+# end context for docs/doc/index.html
+
+# begin context for docs/favicon.png
+# file docs/favicon.png
+e739f3026aa997af4026bc428f4c9ef6:docs/favicon.png
+# end context for docs/favicon.png
+
+# begin context for docs/index.html
+# file docs/index.html
+537ecec67a640c0d8411e4bd8c64675e:docs/index.html
+# end context for docs/index.html
+
+# begin context for docs/sphinx/index.html
+# file docs/sphinx/index.html
+73fe1704e666eacc239cf22c725959bc:docs/sphinx/index.html
+# end context for docs/sphinx/index.html
+
+# begin context for docs/style.css
+# file docs/style.css
+c8281f46ba9a11d0b61bc8ef67eaa357:docs/style.css
+# end context for docs/style.css
+
+# begin context for drom.toml
+# file drom.toml
+62cc93995288cc0319508f2544e2ea49:drom.toml
+# end context for drom.toml
+
+# begin context for dune
+# file dune
+0d57afa9756f983af2551804954af609:dune
+# end context for dune
+
+# begin context for dune-project
+# file dune-project
+63d2fb54c1c7cddfb8b9aeaa5705a852:dune-project
+# end context for dune-project
+
+# begin context for opam/ez_toml.opam
+# file opam/ez_toml.opam
+8b476d03bd278f64da46a38a2ad0d789:opam/ez_toml.opam
+# end context for opam/ez_toml.opam
+
+# begin context for opam/ez_toml_lib.opam
+# file opam/ez_toml_lib.opam
+06e70cc004f52b21e415ca247cbd0fcf:opam/ez_toml_lib.opam
+# end context for opam/ez_toml_lib.opam
+
+# begin context for opam/toml-check.opam
+# file opam/toml-check.opam
+6008184f52b5dcbe601de48a5d9d7b19:opam/toml-check.opam
+# end context for opam/toml-check.opam
+
+# begin context for scripts/after.sh
+# file scripts/after.sh
+62c6489217feef26dac343e709b89c1a:scripts/after.sh
+# end context for scripts/after.sh
+
+# begin context for scripts/before.sh
+# file scripts/before.sh
+371e627833d9ac7ae2f906b5ec97aae2:scripts/before.sh
+# end context for scripts/before.sh
+
+# begin context for scripts/copy-bin.sh
+# file scripts/copy-bin.sh
+bb3a9d286f0dc64021db4194427263ee:scripts/copy-bin.sh
+# end context for scripts/copy-bin.sh
+
+# begin context for scripts/static-build.sh
+# file scripts/static-build.sh
+b243cb6f630e2b0483b76eef1572ff95:scripts/static-build.sh
+# end context for scripts/static-build.sh
+
+# begin context for sphinx/_static/css/fixes.css
+# file sphinx/_static/css/fixes.css
+20bbe7a5dbb3c3278a1511d960616fe5:sphinx/_static/css/fixes.css
+# end context for sphinx/_static/css/fixes.css
+
+# begin context for sphinx/about.rst
+# file sphinx/about.rst
+5bb9e090bc404e88709a58722a30548e:sphinx/about.rst
+# end context for sphinx/about.rst
+
+# begin context for sphinx/conf.py
+# file sphinx/conf.py
+6b467599feeecdbccfd89e4ab2bf0ba1:sphinx/conf.py
+# end context for sphinx/conf.py
+
+# begin context for sphinx/index.rst
+# file sphinx/index.rst
+0120feecd230eaf084f1f46d3c612baa:sphinx/index.rst
+# end context for sphinx/index.rst
+
+# begin context for sphinx/install.rst
+# file sphinx/install.rst
+3ae92a99685f666282e2b6580011c6fe:sphinx/install.rst
+# end context for sphinx/install.rst
+
+# begin context for sphinx/license.rst
+# file sphinx/license.rst
+7f09d28eb87ab9f2650899f85835e74a:sphinx/license.rst
+# end context for sphinx/license.rst
+
+# begin context for src/ez_toml/dune
+# file src/ez_toml/dune
+b18331bf3ffe5c8daccd743ca77973d1:src/ez_toml/dune
+# end context for src/ez_toml/dune
+
+# begin context for src/ez_toml/index.mld
+# file src/ez_toml/index.mld
+640dc8de823eb18a95e6e003ba585690:src/ez_toml/index.mld
+# end context for src/ez_toml/index.mld
+
+# begin context for src/ez_toml/package.toml
+# file src/ez_toml/package.toml
+28ecee23381b0e2d2ad5fd36140e5566:src/ez_toml/package.toml
+# end context for src/ez_toml/package.toml
+
+# begin context for src/ez_toml/version.mlt
+# file src/ez_toml/version.mlt
+940d29cde7f16cd0916ed1d5f9c41154:src/ez_toml/version.mlt
+# end context for src/ez_toml/version.mlt
+
+# begin context for src/toml-check/dune
+# file src/toml-check/dune
+edda874df5dbe0b8ee8e5025128a0a48:src/toml-check/dune
+# end context for src/toml-check/dune
+
+# begin context for src/toml-check/linking_flags.sh
+# file src/toml-check/linking_flags.sh
+9fdfca3cc53df639758ff04fe09d3243:src/toml-check/linking_flags.sh
+# end context for src/toml-check/linking_flags.sh
+
+# begin context for src/toml-check/package.toml
+# file src/toml-check/package.toml
+82a65d78edd83cdbeb63719baa90c1f8:src/toml-check/package.toml
+# end context for src/toml-check/package.toml
+
+# begin context for src/toml-check/version.mlt
+# file src/toml-check/version.mlt
+940d29cde7f16cd0916ed1d5f9c41154:src/toml-check/version.mlt
+# end context for src/toml-check/version.mlt
+
+# begin context for test/expect-tests/dune
+# file test/expect-tests/dune
+baf6a7adf4d444a89c4bc50a33e31fa4:test/expect-tests/dune
+# end context for test/expect-tests/dune
+
+# begin context for test/expect-tests/test.ml
+# file test/expect-tests/test.ml
+24150bafd4bec9b34e6c2987843f0d50:test/expect-tests/test.ml
+# end context for test/expect-tests/test.ml
+
+# begin context for test/inline-tests/dune
+# file test/inline-tests/dune
+078cf3fcffec771792330159a250c917:test/inline-tests/dune
+# end context for test/inline-tests/dune
+
+# begin context for test/inline-tests/test.ml
+# file test/inline-tests/test.ml
+37b8bc6035cda6302a80178c61f9626e:test/inline-tests/test.ml
+# end context for test/inline-tests/test.ml
+
+# begin context for test/output-tests/dune
+# file test/output-tests/dune
+538a09ea4b544d77e29f10b34db2e9d8:test/output-tests/dune
+# end context for test/output-tests/dune
+
+# begin context for test/output-tests/test1.expected
+# file test/output-tests/test1.expected
+dc8d6157230e9ef8e965865f990fbc49:test/output-tests/test1.expected
+# end context for test/output-tests/test1.expected
+
+# begin context for test/output-tests/test2.expected
+# file test/output-tests/test2.expected
+ee63957b3b77455a12e6c269a5032c3f:test/output-tests/test2.expected
+# end context for test/output-tests/test2.expected
+
+# begin context for test/output-tests/test2.ml
+# file test/output-tests/test2.ml
+e8eaab7626ef0aace5e570fffe81f869:test/output-tests/test2.ml
+# end context for test/output-tests/test2.ml
