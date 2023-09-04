@@ -53,6 +53,7 @@ gen-version = "version.ml"
 #   ez_file = ">=0.1 <1.3"
 #   base-unix = { libname = "unix", version = ">=base" } 
 [dependencies]
+toml = ">=0.7"
 ez_toml = "version"
 ezjsonm = "1.0"
 ez_cmdliner = "0.3"

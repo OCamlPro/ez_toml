@@ -10,8 +10,6 @@
 (*                                                                        *)
 (**************************************************************************)
 
-module DEPRECATED = Drom_toml
-
 module Types = Types
 open Types
 

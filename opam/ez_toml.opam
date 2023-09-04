@@ -41,7 +41,6 @@ depends: [
   "ocplib_stuff" {}
   "menhirLib" {> "2019"}
   "ez_file" {>= "0.3"}
-  "drom_toml" {>= "0.7"}
   "ISO8601" {>= "0.2"}
   "ppx_inline_test" {with-test}
   "ppx_expect" {with-test}

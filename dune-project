@@ -18,7 +18,6 @@
    ocplib_stuff
    (menhirLib ( > 2019 ))
    (ez_file ( >= 0.3 ))
-   (drom_toml ( >= 0.7 ))
    (ISO8601 ( >= 0.2 ))
    ppx_inline_test
    ppx_expect
@@ -33,6 +32,7 @@
  (description "This is the description\nof the ez_toml OCaml project\n")
  (depends
    (ocaml (>= 4.07.0))
+   (toml ( >= 0.7 ))
    (ezjsonm ( >= 1.0 ))
    (ez_toml (= version))
    (ez_file ( >= 0.3 ))

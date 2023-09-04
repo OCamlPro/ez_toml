@@ -13,8 +13,6 @@
 (* open EzCompat *)
 open Ez_file.V1
 
-module DEPRECATED = Drom_toml
-
 module Types = Types
 
 open Types

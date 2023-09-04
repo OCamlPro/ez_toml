@@ -11,6 +11,7 @@
 (**************************************************************************)
 
 open EzCompat
+open Ez_file.V1
 
 open Ezcmd.V2
 open EZCMD.TYPES
@@ -26,8 +27,8 @@ let string_of_date float =
 
 module TOML : sig
 
-  val of_table : table -> Ez_toml.DEPRECATED.Types.table
-  val to_table : Ez_toml.DEPRECATED.Types.table -> table
+  val of_table : table -> Toml.Types.table
+  val to_table : Toml.Types.table -> table
 
   val string_of_table : table -> string
 
@@ -35,7 +36,7 @@ module TOML : sig
 
 end = struct
 
-  open Ez_toml.DEPRECATED.Types
+  open Toml.Types
 
   exception UnsupportedMixedArray
 
@@ -126,43 +127,71 @@ end = struct
             Ez_toml.node @@ Array ( to_array v))
 
   let of_filename file =
-    match Ez_toml.DEPRECATED.Parser.from_filename file with
+    match Toml.Parser.from_filename file with
     | `Ok table -> to_table table
     | `Error (msg, _loc) -> failwith msg
 
   let string_of_table table =
-    Ez_toml.DEPRECATED.Printer.string_of_table ( of_table table )
+    Toml.Printer.string_of_table ( of_table table )
 
 end
 type output_format = JSON | TOML | NONE
 
-let rec json_of_table table =
-  let list = ref [] in
-  StringMap.iter (fun key value ->
-      let value = json_of_value value.node_value in
-      list := ( key, value ) :: !list
-    ) table;
-  let value = `O (List.rev !list) in
-  ( value :> Ezjsonm.t )
+module JSON = struct
 
-and json_of_value value =
-  match value with
-  | String s -> `String s
-  | Bool bool -> `Bool bool
-  | Float float -> `Float ( float_of_string float )
-  | Int int -> `Float (float_of_string int)
-  | Date date -> `String date
-  | Table table -> ( json_of_table table :> Ezjsonm.value )
-  | Array array -> ( json_of_array array :> Ezjsonm.value )
+  let rec of_table table =
+    let list = ref [] in
+    StringMap.iter (fun key value ->
+        let value = of_value value.node_value in
+        list := ( key, value ) :: !list
+      ) table;
+    let value = `O (List.rev !list) in
+    ( value :> Ezjsonm.t )
 
-and json_of_array array =
-  let array = Array.map (fun node -> json_of_value node.node_value) array in
-  `A ( Array.to_list array )
+  and of_value value =
+    match value with
+    | String s -> `String s
+    | Bool bool -> `Bool bool
+    | Float float -> `Float ( float_of_string float )
+    | Int int -> `Float (float_of_string int)
+    | Date date -> `String date
+    | Table table -> ( of_table table :> Ezjsonm.value )
+    | Array array -> ( of_array array :> Ezjsonm.value )
+
+  and of_array array =
+    let array = Array.map (fun node -> of_value node.node_value) array in
+    `A ( Array.to_list array )
+
+  let rec to_table ( json : Ezjsonm.t ) =
+    match to_value ( json :> Ezjsonm.value ) with
+    | Table table -> table
+    | _ -> assert false
+
+  and to_value json =
+    match json with
+    | `Bool b -> Bool b
+    | `String s -> String s
+    | `Float n -> Float ( string_of_float n )
+    | `Null -> String "NULL"
+    | `A list ->
+        Array (List.map (fun value ->
+            Ez_toml.node @@ to_value value
+          ) list |> Array.of_list )
+    | `O list ->
+        let table = ref StringMap.empty in
+        List.iter (fun ( key, value ) ->
+            table := StringMap.add key
+                ( Ez_toml.node @@ to_value value ) !table
+          ) list ;
+        Table !table
+
+end
 
 let () =
   let use_current_parser = ref true in
   let use_current_printer = ref true in
   let output_format = ref JSON in
+  let input_format = ref TOML in
   let output_file = ref None in
   let files = ref [] in
   let action () =
@@ -180,16 +209,22 @@ let () =
         end;
         Printf.eprintf "Parsing %S\n%!" file;
         match
-          if !use_current_parser then
-            Ez_toml.of_file file
-          else
-            TOML.of_filename file
+          match !input_format with
+          | NONE | TOML ->
+              if !use_current_parser then
+                Ez_toml.of_file file
+              else
+                TOML.of_filename file
+          | JSON ->
+              let string = EzFile.read_file file in
+              let json = Ezjsonm.from_string string in
+              JSON.to_table json
         with
         | table ->
             begin
               match !output_format with
               | JSON ->
-                  let json = json_of_table table in
+                  let json = JSON.of_table table in
                   let s = Ezjsonm.to_string ~minify:false json in
                   output s
               | TOML ->
@@ -215,6 +250,10 @@ let () =
         Arg.Anons (fun list -> files := list),
         EZCMD.info ~docv:"FILE" "Cobol file to parse";
 
+        [ "of-json" ], Arg.Unit (fun () ->
+            input_format := JSON;
+            output_format := TOML),
+        EZCMD.info "Output content to JSON format (default)";
         [ "to-json" ], Arg.Unit (fun () -> output_format := JSON),
         EZCMD.info "Output content to JSON format (default)";
         [ "to-toml" ], Arg.Unit (fun () -> output_format := TOML),
