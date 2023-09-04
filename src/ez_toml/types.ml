@@ -14,10 +14,10 @@ open EzCompat
 
 type location = {
   file : string ;
-  line_begin : int ;
-  line_end : int ;
-  char_begin : int ;
-  char_end : int ; (* in line *)
+  mutable line_begin : int ;
+  mutable line_end : int ;
+  mutable char_begin : int ;
+  mutable char_end : int ; (* in line *)
 }
 
 type error =
@@ -33,7 +33,7 @@ type table = node StringMap.t
 
 and node = {
   node_comment_before : string list ;  (* comments on preceeding lines *)
-  node_comment_after : string option ; (* comment at end of line *)
+  mutable node_comment_after : string option ; (* comment at end of line *)
   node_loc : location ;
   node_format : format ;
   node_pos : int ;     (* a position *)

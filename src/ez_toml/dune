@@ -13,6 +13,8 @@
   
   )
 
+(menhir (modules parser))
+(ocamllex lexer)
 
 (rule
     (targets version.ml)

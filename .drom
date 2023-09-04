@@ -5,7 +5,7 @@ version:0.9.0
 
 # hash of toml configuration files
 # used for generation of all files
-c7840e23beba769850c5f1e75cc767b7:.
+9c0a26073747a28e6138e3c46bc3c44f:.
 # end context for .
 
 # begin context for .github/workflows/workflow.yml
@@ -95,7 +95,7 @@ c8281f46ba9a11d0b61bc8ef67eaa357:docs/style.css
 
 # begin context for dune-project
 # file dune-project
-63d2fb54c1c7cddfb8b9aeaa5705a852:dune-project
+d752f4beb0c964ba271e2ebcd9cab595:dune-project
 # end context for dune-project
 
 # begin context for opam/ez_toml.opam
@@ -165,7 +165,7 @@ b243cb6f630e2b0483b76eef1572ff95:scripts/static-build.sh
 
 # begin context for src/ez_toml/dune
 # file src/ez_toml/dune
-b18331bf3ffe5c8daccd743ca77973d1:src/ez_toml/dune
+803c625c2e542a1d49528837b7b3ec87:src/ez_toml/dune
 # end context for src/ez_toml/dune
 
 # begin context for src/ez_toml/index.mld

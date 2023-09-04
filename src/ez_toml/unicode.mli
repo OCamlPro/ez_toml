@@ -10,24 +10,4 @@
 (*                                                                        *)
 (**************************************************************************)
 
-open Types
-
-let last_node_pos = ref 0
-
-let allow_override = ref false
-
-let noloc = { file = "";
-              line_begin = 0;
-              line_end = 0;
-              char_begin = 0;
-              char_end = 0 }
-
-let node ?(pos=max_int) ?(format=Any) ?(loc=noloc) ?(before=[]) ?after
-    value =
-  { node_loc = loc ;
-    node_comment_before = before;
-    node_comment_after = after;
-    node_value = value ;
-    node_format = format ;
-    node_pos = pos;
-  }
+val to_utf8 : string -> string
