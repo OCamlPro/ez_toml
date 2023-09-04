@@ -224,7 +224,11 @@ inline_table_key_values:
   key_values = separated_list(COMMA, keyValue) { key_values }
 
 array_start:
-    COMMA value array_start { node $2 :: $3 }
+  | value array_end { node $1 ::$2 }
+  | RBRACK { [] }
+
+array_end:
+    COMMA value array_end { node $2 :: $3 }
   | COMMA? RBRACK { [] }
 
 %%

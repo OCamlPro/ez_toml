@@ -29,3 +29,5 @@ val noloc : location
 val node : ?pos:int -> ?format:Types.format ->
   ?loc:location -> ?before:string list -> ?after:string ->
   value -> node
+
+val string_of_location : location -> string

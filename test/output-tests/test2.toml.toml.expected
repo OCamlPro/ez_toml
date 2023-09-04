@@ -1,16 +1,17 @@
 title = "TOML Example"
 [clients]
-data = [["gamma", "delta"], [1, 2]]
-hosts = ["alpha", "omega"]
+data = [ [ "gamma", "delta" ], [ 1, 2 ] ]
+hosts = [ "alpha", "omega" ]
 [database]
 connection_max = 5000
 enabled = true
-ports = [8001, 8001, 8002]
+ports = [ 8001, 8001, 8002 ]
 server = "192.168.1.1"
 [owner]
-bio = """GitHub Cofounder & CEO
+bio = """
+GitHub Cofounder & CEO
 Likes tater tots and beer."""
-dob = 1979-05-27T07:32:00+00:00
+dob = 1979-05-27T07:32:00Z
 name = "Tom Preston-Werner"
 organization = "GitHub"
 [[products]]

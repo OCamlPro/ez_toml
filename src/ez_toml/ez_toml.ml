@@ -17,6 +17,8 @@ module DEPRECATED = Drom_toml
 
 module Types = Types
 
+open Types
+
 let of_string ?file string =
   let lexbuf = Lexing.from_string string in
   begin
@@ -25,8 +27,15 @@ let of_string ?file string =
     | Some file ->
         Lexing.set_filename lexbuf file
   end;
-  (* Parser.toml Lexer.tomlex lexbuf *)
-  assert false (* TODO *)
+  try
+    Parser.toml Lexer.tomlex lexbuf
+  with
+  | Parser.Error ->
+      let loc = Lexer.loc_of_lexbuf lexbuf in
+      raise (Error (loc, Parse_error))
+  | Failure msg ->
+      let loc = Lexer.loc_of_lexbuf lexbuf in
+      raise (Error (loc, Syntax_error msg))
 
 let of_file file =
   let s = EzFile.read_file file in
@@ -37,6 +46,22 @@ let to_file table file =
   let s = to_string table in
   EzFile.write_file file s
 
-let string_of_error _error = assert false
+let string_of_error error =
+  match error with
+  | Parse_error -> "Parse error"
+  | Syntax_error msg -> Printf.sprintf "Syntax error: %s" msg
+
+let string_of_location loc =
+  Printf.sprintf "File %S, line %s, chars %s"
+    loc.file
+    ( if loc.line_begin = loc.line_end then
+        string_of_int loc.line_begin
+      else
+        Printf.sprintf "%d-%d" loc.line_begin loc.line_end )
+    ( if loc.char_begin = loc.char_end then
+        string_of_int loc.char_begin
+      else
+        Printf.sprintf "%d-%d" loc.char_begin loc.char_end )
+
 
 include Misc

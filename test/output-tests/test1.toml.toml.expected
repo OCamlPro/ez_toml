@@ -1,10 +1,10 @@
 [array]
-key1 = [1, 2, 3]
-key2 = ["red", "yellow", "green"]
-key3 = [[1, 2], [3, 4, 5]]
-key4 = [[1, 2], ["a", "b", "c"]]
-key5 = [1, 2, 3]
-key6 = [1, 2]
+key1 = [ 1, 2, 3 ]
+key2 = [ "red", "yellow", "green" ]
+key3 = [ [ 1, 2 ], [ 3, 4, 5 ] ]
+key4 = [ [ 1, 2 ], [ "a", "b", "c" ] ]
+key5 = [ 1, 2, 3 ]
+key6 = [ 1, 2 ]
 [[array.inline.points]]
 x = 1
 y = 2
@@ -21,15 +21,15 @@ z = 8
 False = false
 True = true
 [datetime]
-key1 = 1979-05-27T00:00:00+00:00
-key2 = 1979-05-27T07:32:00+00:00
-key3 = 1979-05-27T07:32:00+00:00
+key1 = 1979-05-27
+key2 = 1979-05-27T07:32:00Z
+key3 = 1979-05-27T00:32:00-07:00
 [float.exponent]
-key1 = 49999999999999995805696.0
-key2 = 1000000.0
-key3 = -0.02
+key1 = 5e+22
+key2 = 1e6
+key3 = -2E-2
 [float.fractional]
-key1 = 1.0
+key1 = +1.0
 key2 = 3.1415
 key3 = -0.01
 [[fruit]]
@@ -46,14 +46,14 @@ name = "banana"
 [[fruit.variety]]
 name = "plantain"
 [integer]
-key1 = 99
+key1 = +99
 key2 = 42
 key3 = 0
 key4 = -17
 [integer.underscores]
-key1 = 1000
-key2 = 5349221
-key3 = 12345
+key1 = 1_000
+key2 = 5_349_221
+key3 = 1_2_3_4_5
 [[products]]
 name = "Hammer"
 sku = 738594937
@@ -62,25 +62,31 @@ color = "gray"
 name = "Nail"
 sku = 284758393
 [string.basic]
-basic = "I'm a string. \"You can quote me\". Name\tJosé\nLocation\tSF."
+basic = """
+I'm a string. \"You can quote me\". Name\tJosé
+Location\tSF."""
 [string.literal]
 quoted = "Tom \"Dubs\" Preston-Werner"
 regex = "<\\i\\c*\\s*>"
 winpath = "C:\\Users\\nodejs\\templates"
 winpath2 = "\\\\ServerX\\admin$\\system32\\"
 [string.literal.multiline]
-lines = """The first newline is
+lines = """
+The first newline is
 trimmed in raw strings.
    All other whitespace
    is preserved.
 """
 regex2 = "I [dw]on't need \\d{2} apples"
 [string.multiline]
-key1 = """One
+key1 = """
+One
 Two"""
-key2 = """One
+key2 = """
+One
 Two"""
-key3 = """One
+key3 = """
+One
 Two"""
 [string.multiline.continued]
 key1 = "The quick brown fox jumps over the lazy dog."

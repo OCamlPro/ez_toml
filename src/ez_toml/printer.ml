@@ -66,6 +66,11 @@ type context =
   | InsideArray
   | InsideInlineTable
 
+let is_table_node node =
+  match node.node_value, node.node_format with
+  | Table _, Any -> true
+  | _ -> false
+
 let split_table table =
   let sections = ref [] in
   let simple_values = ref [] in
@@ -73,6 +78,8 @@ let split_table table =
       let is_section =
         match node.node_value, node.node_format with
         | Table _, Any -> true
+        | Array array, ( Any | Multiline )
+          when Array.for_all is_table_node array -> true
         | _ -> false
       in
       if is_section then
@@ -101,11 +108,6 @@ let rec extract_singleton key_path node =
         ( key_path, node )
   | _ -> ( key_path, node )
 
-let is_table_node node =
-  match node.node_value, node.node_format with
-  | Table _, Any -> true
-  | _ -> false
-
 let rec bprint_toplevel_table b table =
   bprint_table b [] ( split_table table )
 
@@ -114,9 +116,30 @@ and bprint_table b prefix (simple_values, sections) =
   List.iter (fun (key,node) ->
       let key_path, node = extract_singleton [key] node in
       bprint_comment_before b node ;
-      match node.node_value, node.node_format with
-      | Array array, Any when Array.for_all is_table_node array ->
-          let key_path = prefix @ key_path in
+      bprint_key_path b key_path ;
+      Printf.bprintf b " = ";
+      bprint_value b node.node_format InsideTable node.node_value ;
+      bprint_comment_after b node ;
+    ) simple_values ;
+
+  List.iter (fun (key,node) ->
+      match node.node_value with
+      | Table table ->
+          bprint_comment_before b node ;
+          let (simple_values,sections) = split_table table in
+          let key_path = prefix @ [key] in
+          begin
+            match simple_values with
+            | [] -> ()
+            | _ ->
+                Printf.bprintf b "[";
+                bprint_key_path b key_path;
+                Printf.bprintf b "]";
+                bprint_comment_after b node ;
+          end;
+          bprint_table b key_path (simple_values, sections);
+      | Array array ->
+          let key_path = prefix @ [ key ] in
           Array.iter (fun node ->
               bprint_comment_before b node ;
               Buffer.add_string b "[[";
@@ -129,30 +152,7 @@ and bprint_table b prefix (simple_values, sections) =
               in
               bprint_table b key_path ( split_table table )
             ) array
-      | _ ->
-          bprint_key_path b key_path ;
-          Printf.bprintf b " = ";
-          bprint_value b node.node_format InsideTable node.node_value ;
-          bprint_comment_after b node ;
-    ) simple_values ;
-
-  List.iter (fun (key,node) ->
-      bprint_comment_before b node ;
-      let (simple_values,sections) = match node.node_value with
-        | Table table -> split_table table
-        | _ -> assert false
-      in
-      let key_path = prefix @ [key] in
-      begin
-        match simple_values with
-        | [] -> ()
-        | _ ->
-            Printf.bprintf b "[";
-            bprint_key_path b key_path;
-            Printf.bprintf b "]";
-      end;
-      bprint_table b key_path (simple_values, sections);
-      bprint_comment_after b node ;
+      | _ -> assert false
     ) sections ;
   ()
 

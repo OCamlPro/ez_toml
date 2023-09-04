@@ -21,7 +21,10 @@ type location = {
 }
 
 type error =
-  | Parse_error of location
+  | Parse_error
+  | Syntax_error of string
+
+exception Error of location * error
 
 type format =
   | Any       (* Guess automatically. Usually, use block format *)
