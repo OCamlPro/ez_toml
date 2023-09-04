@@ -4,10 +4,12 @@ opam-version: "2.0"
 name: "toml-check"
 version: "0.1.0"
 license: "LGPL-2.1-only WITH OCaml-LGPL-linking-exception"
-synopsis: "The ez_toml project"
+synopsis: "The ez_toml library reads and writes files in TOML format"
 description: """\
-This is the description
-of the ez_toml OCaml project
+This ez_toml library is a small library to read and write files in TOML
+format. Compared to the toml library, it supports more features (mixed
+arrays for example), fixes a few bugs in the printer, and keeps better
+track of options order and comments in file.
 """
 authors: ["Fabrice Le Fessant <fabrice.le_fessant@ocamlpro.com>"]
 maintainer: ["Fabrice Le Fessant <fabrice.le_fessant@ocamlpro.com>"]

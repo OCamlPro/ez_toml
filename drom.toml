@@ -13,7 +13,7 @@ license = "LGPL2"
 min-edition = "4.07.0"
 name = "ez_toml"
 skeleton = "program"
-synopsis = "The ez_toml project"
+synopsis = "The ez_toml library reads and writes files in TOML format"
 version = "0.1.0"
 
 # keys that you could also define:
@@ -28,12 +28,14 @@ version = "0.1.0"
 
 [project]
 description = """
-This is the description
-of the ez_toml OCaml project
+This ez_toml library is a small library to read and write files in TOML
+format. Compared to the toml library, it supports more features (mixed
+arrays for example), fixes a few bugs in the printer, and keeps better
+track of options order and comments in file.
 """
 
 [project]
-skip = []
+skip = [ "test/output-tests/dune" ]
 
 # project-wide library dependencies (not for package-specific deps)
 [dependencies]

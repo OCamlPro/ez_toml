@@ -23,7 +23,9 @@ let of_string ?file string =
     match file with
     | None -> ()
     | Some file ->
-        Lexing.set_filename lexbuf file
+        (* Lexing.set_filename lexbuf file available at 4.11 *)
+        let open Lexing in
+        lexbuf.lex_curr_p <- {lexbuf.lex_curr_p with pos_fname = file}
   end;
   try
     Parser.toml Lexer.tomlex lexbuf

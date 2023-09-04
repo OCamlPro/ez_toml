@@ -5,7 +5,7 @@ version:0.9.0
 
 # hash of toml configuration files
 # used for generation of all files
-c7892acfec2d7ad8be70ac46a0294073:.
+b48ce3176654c31bfb8c4e86e6a90948:.
 # end context for .
 
 # begin context for .github/workflows/workflow.yml
@@ -70,7 +70,7 @@ e739f3026aa997af4026bc428f4c9ef6:docs/favicon.png
 
 # begin context for docs/index.html
 # file docs/index.html
-537ecec67a640c0d8411e4bd8c64675e:docs/index.html
+dfde4a94a9e9f50ed95245d94f5b89b3:docs/index.html
 # end context for docs/index.html
 
 # begin context for docs/sphinx/index.html
@@ -95,12 +95,12 @@ c8281f46ba9a11d0b61bc8ef67eaa357:docs/style.css
 
 # begin context for dune-project
 # file dune-project
-d12b35e8cfb2b16aabd87e4afb426dd8:dune-project
+7b4819058936ae89483265abf6e217e7:dune-project
 # end context for dune-project
 
 # begin context for opam/ez_toml.opam
 # file opam/ez_toml.opam
-3a9e06c6c2aa68e2631d84195ac60804:opam/ez_toml.opam
+c65f3722a4d42315c0d9955f5e2f390f:opam/ez_toml.opam
 # end context for opam/ez_toml.opam
 
 # begin context for opam/ez_toml_lib.opam
@@ -110,7 +110,7 @@ d12b35e8cfb2b16aabd87e4afb426dd8:dune-project
 
 # begin context for opam/toml-check.opam
 # file opam/toml-check.opam
-da5cf9bb0ad792eb7824830c439d14a0:opam/toml-check.opam
+27e0f32fcb83095a4eb1a6e41e607ad4:opam/toml-check.opam
 # end context for opam/toml-check.opam
 
 # begin context for scripts/after.sh
@@ -140,7 +140,7 @@ b243cb6f630e2b0483b76eef1572ff95:scripts/static-build.sh
 
 # begin context for sphinx/about.rst
 # file sphinx/about.rst
-5bb9e090bc404e88709a58722a30548e:sphinx/about.rst
+de4bda9e0b474977e6ff7357fd8afefa:sphinx/about.rst
 # end context for sphinx/about.rst
 
 # begin context for sphinx/conf.py
@@ -170,7 +170,7 @@ b243cb6f630e2b0483b76eef1572ff95:scripts/static-build.sh
 
 # begin context for src/ez_toml/index.mld
 # file src/ez_toml/index.mld
-640dc8de823eb18a95e6e003ba585690:src/ez_toml/index.mld
+845769566efdcef378648622b545f3b8:src/ez_toml/index.mld
 # end context for src/ez_toml/index.mld
 
 # begin context for src/ez_toml/package.toml

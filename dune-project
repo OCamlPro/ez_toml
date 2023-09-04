@@ -11,8 +11,8 @@
 
 (package
  (name ez_toml)
- (synopsis "The ez_toml project")
- (description "This is the description\nof the ez_toml OCaml project\n")
+ (synopsis "The ez_toml library reads and writes files in TOML format")
+ (description "This ez_toml library is a small library to read and write files in TOML\nformat. Compared to the toml library, it supports more features (mixed\narrays for example), fixes a few bugs in the printer, and keeps better\ntrack of options order and comments in file.\n")
  (depends
    (ocaml (>= 4.07.0))
    ocplib_stuff
@@ -28,8 +28,8 @@
 
 (package
  (name toml-check)
- (synopsis "The ez_toml project")
- (description "This is the description\nof the ez_toml OCaml project\n")
+ (synopsis "The ez_toml library reads and writes files in TOML format")
+ (description "This ez_toml library is a small library to read and write files in TOML\nformat. Compared to the toml library, it supports more features (mixed\narrays for example), fixes a few bugs in the printer, and keeps better\ntrack of options order and comments in file.\n")
  (depends
    (ocaml (>= 4.07.0))
    (toml ( >= 0.7 ))
