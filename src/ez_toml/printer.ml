@@ -129,8 +129,8 @@ and bprint_table b prefix (simple_values, sections) =
           let (simple_values,sections) = split_table table in
           let key_path = prefix @ [key] in
           begin
-            match simple_values with
-            | [] -> ()
+            match simple_values, sections with
+            | [], _ :: _ -> ()
             | _ ->
                 Printf.bprintf b "[";
                 bprint_key_path b key_path;

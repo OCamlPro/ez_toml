@@ -14,42 +14,7 @@
   (* Directly imported from toml.7.0.1 *)
 
   (*[@@@warning "-26"]*)
-open Types
 open Parser
-open Lexing
-
-let last_node = ref None
-let waiting_comments_rev = ref []
-
-let init () =
-  last_node := None ;
-  waiting_comments_rev := [];
-  Misc.last_node_pos := 0
-
-let loc_of_lexbuf lexbuf =
-  let begin_pos = lexbuf.lex_start_p in
-  let end_pos = lexbuf.lex_curr_p in
-  {
-    file = begin_pos.pos_fname ;
-    line_begin = begin_pos.pos_lnum ;
-    char_begin = begin_pos.pos_bol ;
-    line_end = end_pos.pos_lnum ;
-    char_end = end_pos.pos_bol ;
-  }
-
-let update_loc lexbuf =
-  let pos = lexbuf.lex_curr_p in
-  last_node := None ;
-  lexbuf.lex_curr_p <- {
-    pos with
-    pos_lnum = pos.pos_lnum + 1;
-    pos_bol = pos.pos_cnum;
-  }
-
-let add_comment _lexbuf s =
-  match !last_node with
-  | None -> waiting_comments_rev := s :: !waiting_comments_rev
-  | Some node -> node.node_comment_after <- Some s
 }
 
 let t_white   = ['\t' ' ']
@@ -91,7 +56,7 @@ rule tomlex = parse
 | t_bool as value  { BOOL (bool_of_string value) }
 | t_date as date { DATE date}
 | t_white+ { tomlex lexbuf }
-| t_eol { update_loc lexbuf;tomlex lexbuf }
+| t_eol { Internal.update_loc lexbuf;tomlex lexbuf }
 | '=' { EQUAL }
 
 (* Only for Drom: we need to be able to combine values in templates *)
@@ -105,12 +70,12 @@ rule tomlex = parse
 | '{' { LBRACE }
 | '}' { RBRACE }
 | '"' '"' '"' (t_eol? as eol) {
-    if eol <> "" then update_loc lexbuf ;
+    if eol <> "" then Internal.update_loc lexbuf ;
     multiline_string (Buffer.create 13) lexbuf }
 | '"' { basic_string (Buffer.create 13) lexbuf }
 | '\'' { literal_string (Buffer.create 13) lexbuf }
 | "'''" (t_eol? as eol) {
-    if eol <> "" then update_loc lexbuf ;
+    if eol <> "" then Internal.update_loc lexbuf ;
     multiline_literal_string (Buffer.create 13) lexbuf }
 | ',' { COMMA }
 | '.' { DOT }
@@ -119,39 +84,41 @@ rule tomlex = parse
 | eof   { EOF }
 
 and literal_string buff = parse
-| '\''   { STRING (Buffer.contents buff)}
+| '\''   { STRING_INLINE (Internal_types.Literal, Buffer.contents buff)}
 | _ as c {
   Buffer.add_char buff c ;
   literal_string buff lexbuf }
 
 and multiline_literal_string buff = parse
-| "'''"  { STRING (Buffer.contents buff)}
+  | "'''"  { STRING_MULTILINE (Internal_types.LiteralMultiline,
+                               Buffer.contents buff)}
 | t_eol as eol {
   Buffer.add_string buff eol ;
-  update_loc lexbuf ;
+  Internal.update_loc lexbuf ;
   multiline_literal_string buff lexbuf }
 | _ as c {
   Buffer.add_char buff c ;
   multiline_literal_string buff lexbuf }
 
 and basic_string buff = parse
-| '"'  { STRING (Buffer.contents buff) }
+| '"'  { STRING_INLINE (Internal_types.Quoted, Buffer.contents buff) }
 | ""   { string_common basic_string buff lexbuf }
 
 and multiline_string buff = parse
-| '"' '"' '"' { STRING (Buffer.contents buff) }
+  | '"' '"' '"' { STRING_MULTILINE (Internal_types.QuotedMultiline,
+                                    Buffer.contents buff) }
 | '\\' t_eol {
-  update_loc lexbuf;
+  Internal.update_loc lexbuf;
   multiline_string_trim buff lexbuf }
 | t_eol as eol {
-  update_loc lexbuf;
+  Internal.update_loc lexbuf;
   Buffer.add_string buff eol;
   multiline_string buff lexbuf }
 | "" { string_common multiline_string buff lexbuf }
 
 and multiline_string_trim buff = parse
 | t_eol {
-  update_loc lexbuf;
+  Internal.update_loc lexbuf;
   multiline_string_trim buff lexbuf }
 | t_white { multiline_string_trim buff lexbuf }
 | "" { multiline_string buff lexbuf }

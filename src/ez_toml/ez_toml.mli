@@ -25,7 +25,8 @@ val string_of_error : error -> string
 
 val noloc : location
 val node : ?pos:int -> ?format:Types.format ->
-  ?loc:location -> ?before:string list -> ?after:string ->
+  ?loc:location -> ?before:string list ->
+  ?name:key_path -> ?after:string ->
   value -> node
 
 val string_of_location : location -> string

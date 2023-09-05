@@ -24,6 +24,9 @@ True = true
 key1 = 1979-05-27
 key2 = 1979-05-27T07:32:00Z
 key3 = 1979-05-27T00:32:00-07:00
+key4 = 1979-05-27T00:32:00.999999-07:00
+[float.both]
+key = 6.626e-34
 [float.exponent]
 key1 = 5e+22
 key2 = 1e6
@@ -32,6 +35,9 @@ key3 = -2E-2
 key1 = +1.0
 key2 = 3.1415
 key3 = -0.01
+[float.underscores]
+key1 = 9_224_617.445_991_228_313
+key2 = 1e1_000
 [[fruit]]
 name = "apple"
 [fruit.physical]
@@ -57,6 +63,7 @@ key3 = 1_2_3_4_5
 [[products]]
 name = "Hammer"
 sku = 738594937
+[[products]]
 [[products]]
 color = "gray"
 name = "Nail"
@@ -102,4 +109,5 @@ x = 1
 y = 2
 [table.subtable]
 key = "another value"
+[x.y.z.w]
 

@@ -35,20 +35,20 @@ track of options order and comments in file.
 """
 
 [project]
-skip = [ "test/output-tests/dune" ]
+skip = [ "test/output-tests/dune" ,
+"test/expect-tests/dune" ,
+"test/expect-tests/test.ml" ,
+"test/inline-tests/dune" ,
+"test/inline-tests/test.ml" ,
+
+]
 
 # project-wide library dependencies (not for package-specific deps)
 [dependencies]
 
 # project-wide tools dependencies (not for package-specific deps)
-[tools.ocamlformat]
-for-test = true
 [tools.odoc]
 for-doc = true
-[tools.ppx_expect]
-for-test = true
-[tools.ppx_inline_test]
-for-test = true
 
 [project]
 

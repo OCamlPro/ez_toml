@@ -12,6 +12,9 @@
 
 open EzCompat
 
+type key = string
+type key_path = key list
+
 type location = {
   file : string ;
   mutable line_begin : int ;
@@ -23,6 +26,11 @@ type location = {
 type error =
   | Parse_error
   | Syntax_error of string
+  | Invalid_lookup
+  | Invalid_lookup_in_inline_array
+  | Key_already_exists of key_path
+  | Invalid_key_set of key
+  | Invalid_table of key_path
 
 exception Error of location * error
 
@@ -40,7 +48,8 @@ and node = {
   node_loc : location ;
   node_format : format ;
   node_pos : int ;     (* a position *)
-  node_value : value ;
+  mutable node_value : value ;
+  node_name : key_path ;
 }
 
 and value =

@@ -18,6 +18,7 @@ module Types = Types
 open Types
 
 let of_string ?file string =
+  Internal.init ();
   let lexbuf = Lexing.from_string string in
   begin
     match file with
@@ -28,13 +29,15 @@ let of_string ?file string =
         lexbuf.lex_curr_p <- {lexbuf.lex_curr_p with pos_fname = file}
   end;
   try
-    Parser.toml Lexer.tomlex lexbuf
+    let lines = Parser.toml Lexer.tomlex lexbuf in
+    (*      Internal.eprint_lines lines; *)
+    Internal.table_of_lines lines
   with
   | Parser.Error ->
-      let loc = Lexer.loc_of_lexbuf lexbuf in
+      let loc = Internal.loc_of_lexbuf lexbuf in
       raise (Error (loc, Parse_error))
   | Failure msg ->
-      let loc = Lexer.loc_of_lexbuf lexbuf in
+      let loc = Internal.loc_of_lexbuf lexbuf in
       raise (Error (loc, Syntax_error msg))
 
 let of_file file =
@@ -50,6 +53,18 @@ let string_of_error error =
   match error with
   | Parse_error -> "Parse error"
   | Syntax_error msg -> Printf.sprintf "Syntax error: %s" msg
+  | Invalid_lookup ->
+      Printf.sprintf "Invalid lookup in something not a table"
+  | Invalid_lookup_in_inline_array ->
+      Printf.sprintf "Invalid lookup in inline array"
+  | Key_already_exists key_path ->
+      Printf.sprintf "Duplicate addition of key %s"
+        (Internal.string_of_key_path key_path )
+  | Invalid_key_set key ->
+      Printf.sprintf "Invalid: setting key %s in something not a table" key
+  | Invalid_table key_path ->
+      Printf.sprintf "Invalid: %s is not a table"
+        ( Internal.string_of_key_path key_path )
 
 let string_of_location loc =
   Printf.sprintf "File %S, line %s, chars %s"
@@ -63,5 +78,5 @@ let string_of_location loc =
       else
         Printf.sprintf "%d-%d" loc.char_begin loc.char_end )
 
-
-include Misc
+let noloc = Internal.noloc
+let node = Internal.node

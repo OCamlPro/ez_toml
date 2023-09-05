@@ -5,7 +5,7 @@ version:0.9.0
 
 # hash of toml configuration files
 # used for generation of all files
-b48ce3176654c31bfb8c4e86e6a90948:.
+c57bd2b900bc6d48eac7219db332c829:.
 # end context for .
 
 # begin context for .github/workflows/workflow.yml
@@ -95,12 +95,12 @@ c8281f46ba9a11d0b61bc8ef67eaa357:docs/style.css
 
 # begin context for dune-project
 # file dune-project
-7b4819058936ae89483265abf6e217e7:dune-project
+6fb7e3124334d250a339bdf988b17875:dune-project
 # end context for dune-project
 
 # begin context for opam/ez_toml.opam
 # file opam/ez_toml.opam
-c65f3722a4d42315c0d9955f5e2f390f:opam/ez_toml.opam
+ae16b9e5a99efe0046fe5198271babc2:opam/ez_toml.opam
 # end context for opam/ez_toml.opam
 
 # begin context for opam/ez_toml_lib.opam
@@ -110,7 +110,7 @@ c65f3722a4d42315c0d9955f5e2f390f:opam/ez_toml.opam
 
 # begin context for opam/toml-check.opam
 # file opam/toml-check.opam
-27e0f32fcb83095a4eb1a6e41e607ad4:opam/toml-check.opam
+48b10881e19d1711d52aedd44d39d19a:opam/toml-check.opam
 # end context for opam/toml-check.opam
 
 # begin context for scripts/after.sh
@@ -202,26 +202,6 @@ de4bda9e0b474977e6ff7357fd8afefa:sphinx/about.rst
 # file src/toml-check/version.mlt
 940d29cde7f16cd0916ed1d5f9c41154:src/toml-check/version.mlt
 # end context for src/toml-check/version.mlt
-
-# begin context for test/expect-tests/dune
-# file test/expect-tests/dune
-baf6a7adf4d444a89c4bc50a33e31fa4:test/expect-tests/dune
-# end context for test/expect-tests/dune
-
-# begin context for test/expect-tests/test.ml
-# file test/expect-tests/test.ml
-24150bafd4bec9b34e6c2987843f0d50:test/expect-tests/test.ml
-# end context for test/expect-tests/test.ml
-
-# begin context for test/inline-tests/dune
-# file test/inline-tests/dune
-078cf3fcffec771792330159a250c917:test/inline-tests/dune
-# end context for test/inline-tests/dune
-
-# begin context for test/inline-tests/test.ml
-# file test/inline-tests/test.ml
-37b8bc6035cda6302a80178c61f9626e:test/inline-tests/test.ml
-# end context for test/inline-tests/test.ml
 
 # begin context for test/output-tests/dune
 # file test/output-tests/dune

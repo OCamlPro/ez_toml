@@ -19,10 +19,7 @@
    (menhirLib ( > 2019 ))
    (ez_file ( >= 0.3 ))
    (ISO8601 ( >= 0.2 ))
-   ppx_inline_test
-   ppx_expect
    odoc
-   ocamlformat
   )
  )
 
@@ -37,10 +34,7 @@
    (ez_toml (= version))
    (ez_file ( >= 0.3 ))
    (ez_cmdliner ( >= 0.3 ))
-   ppx_inline_test
-   ppx_expect
    odoc
-   ocamlformat
   )
  )
 
