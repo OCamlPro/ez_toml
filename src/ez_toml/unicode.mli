@@ -10,4 +10,4 @@
 (*                                                                        *)
 (**************************************************************************)
 
-val to_utf8 : string -> string
+val to_utf8 : ?loc:Types.location -> string -> string

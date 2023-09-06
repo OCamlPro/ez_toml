@@ -10,23 +10,33 @@
 (*                                                                        *)
 (**************************************************************************)
 
-module Types = Types
 open Types
 
-val of_string : ?file:string -> string -> table
-val of_file : string -> table
+let noloc = { file = "";
+              line_begin = 0;
+              line_end = 0;
+              char_begin = 0;
+              char_end = 0 }
 
-val to_string : table -> string
-val to_file : table -> string -> unit
+let error ?(loc=noloc) n error = raise @@ Error ( loc, n, error )
 
-val string_of_error : error -> string
+let default_config = {
+  allow_override = false ;
+  allow_extops = false ;
+  pedantic = false ;
+  newline = "\n";
+}
 
-(* useful to build values *)
-
-val noloc : location
-val node : ?pos:int -> ?format:Types.format ->
-  ?loc:location -> ?before:string list ->
-  ?name:key_path -> ?after:string ->
-  value -> node
-
-val string_of_location : location -> string
+let node_counter = ref 0
+let node ?(format=Any) ?(loc=noloc)
+    ?(before=[]) ?(name=["???"]) ?after
+    value =
+  incr node_counter;
+  { node_loc = loc ;
+    node_comment_before = before;
+    node_comment_after = after;
+    node_value = value ;
+    node_format = format ;
+    node_pos = !node_counter;
+    node_name = name;
+  }

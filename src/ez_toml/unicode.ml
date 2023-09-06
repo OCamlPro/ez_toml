@@ -21,7 +21,7 @@
 
 (* This function convert Unicode escaped XXXX to utf-8 encoded string *)
 
-let to_utf8 u =
+let to_utf8 ?loc u =
   let dec = int_of_string @@ "0x" ^ u in
   let update_byte s i mask shift =
     Char.chr
@@ -29,7 +29,7 @@ let to_utf8 u =
     |> Bytes.set s i
   in
   if dec > 0xFFFF then
-    failwith ("Invalid escaped unicode \\u" ^ u)
+    Internal_misc.error ?loc 9 ( Invalid_escaped_unicode u )
   else if dec > 0x7FF then (
     let s = Bytes.of_string "\224\128\128" in
     update_byte s 2 "0b00111111" 0;

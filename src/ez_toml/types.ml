@@ -24,21 +24,40 @@ type location = {
 }
 
 type error =
-  | Parse_error
-  | Syntax_error of string
-  | Invalid_lookup
-  | Invalid_lookup_in_inline_array
-  | Key_already_exists of key_path
-  | Invalid_key_set of key
-  | Invalid_table of key_path
+  | Parse_error                                   (* error 0 *)
+  | Syntax_error of string                        (* error 1 *)
+  | Invalid_lookup                                (* error 2 *)
+  | Invalid_lookup_in_inline_array                (* error 3 *)
+  | Key_already_exists of key_path                (* error 4 *)
+  | Invalid_key_set of key                        (* error 5 *)
+  | Invalid_table of key_path                     (* error 6 *)
+  | Append_item_to_non_array of key_path          (* error 7 *)
+  | Append_item_to_non_table_array of key_path    (* error 8 *)
+  | Invalid_escaped_unicode of string             (* error 9 *)
+  | Expected_error_before_end_of_file of int      (* error 10 *)
+  | Expected_error_did_not_happen of int          (* error 11 *)
+  | Expected_error_but_another_error of int * location * int * error
+  (* error 12 *)
+  | Forbidden_escaped_character                   (* error 13 *)
+  | Unterminated_string                           (* error 14 *)
+  | Control_characters_must_be_escaped of char    (* error 15 *)
+  | Duplicate_table_item of key_path              (* error 16 *)
 
-exception Error of location * error
+exception Error of location * int * error
 
 type format =
   | Any       (* Guess automatically. Usually, use block format *)
   | Inline    (* Put the value on a single line *)
   | Multiline (* Put the value on multiple lines if possible *)
   | Literal   (* Use literal quotes (only for strings) *)
+
+type config = {
+  allow_override : bool ; (* allows setting value twice *)
+  allow_extops : bool ;   (* allows additional operators :=, ==, -= *)
+  pedantic : bool ;       (* complains about spec errors *)
+  newline : string ;      (* newline to be used *)
+}
+
 
 type table = node StringMap.t
 

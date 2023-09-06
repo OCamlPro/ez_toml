@@ -10,15 +10,29 @@
 (*                                                                        *)
 (**************************************************************************)
 
-open EzCompat
+module TOML : sig
 
-val string_of_table :
-  ?config:Types.config ->
-  Types.node StringMap.t ->
-  string
+  module Types = Types
+  open Types
 
-val string_of_key_path : Types.key_path -> string
+  val default_config : config
 
-val string_of_location : Types.location -> string
+  val of_string : ?file:string -> ?config:config -> string -> table
+  val of_file : ?config:config -> string -> table
 
-val string_of_error : Types.error -> string
+  val to_string : table -> string
+  val to_file : table -> string -> unit
+
+  val string_of_error : error -> string
+
+  (* useful to build values *)
+
+  val noloc : location
+  val node : ?format:Types.format ->
+    ?loc:location -> ?before:string list ->
+    ?name:key_path -> ?after:string ->
+    value -> node
+
+  val string_of_location : location -> string
+
+end

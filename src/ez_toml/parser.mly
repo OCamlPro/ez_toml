@@ -17,6 +17,7 @@
 %}
 
 (* OcamlYacc definitions *)
+%token BANG
 %token <bool> BOOL
 %token <string> INTEGER
 %token <string> FLOAT
@@ -42,13 +43,19 @@ group:
 
 group_header:
    | LBRACK LBRACK key_path RBRACK RBRACK {
-       Internal.line $sloc @@ Array_item $3 }
+       Internal_lexing.line $sloc @@ Array_item $3 }
    | LBRACK key_path RBRACK               {
-       Internal.line $sloc @@ Table_item $2 }
+       Internal_lexing.line $sloc @@ Table_item $2 }
+   | LBRACK BANG INTEGER RBRACK               {
+         Internal_lexing.line $sloc
+                               @@ Error_item ( int_of_string $3 ) }
+   | LBRACK BANG RBRACK               {
+         Internal_lexing.line $sloc @@ Table_item [] }
 
 key:
  | STRING_INLINE { snd $1 }
  | KEY    { $1 }
+ | FLOAT  { $1 }
  | INTEGER    { $1 }
 
 key_path: k = separated_nonempty_list (DOT, key) { k }
@@ -60,7 +67,7 @@ op:
  | CLEAR { OpUnset }
 
 keysValue:
- | key_path_loc op value_loc { Internal.line $sloc @@ Set
+ | key_path_loc op value_loc { Internal_lexing.line $sloc @@ Set
                                                { bind_var = $1 ;
                                                  bind_op = $2 ;
                                                  bind_val = $3 } }
@@ -78,10 +85,10 @@ value:
                           keys_set_value) RBRACE { ITable $2 }
 
 key_path_loc :
-  | key_path { Internal.loc $sloc $1 }
+  | key_path { Internal_lexing.loc $sloc $1 }
 
 value_loc:
-  | value { Internal.loc $sloc $1 }
+  | value { Internal_lexing.loc $sloc $1 }
 
 keys_set_value:
   | key_path_loc EQUAL value_loc   { { bind_var = $1 ;

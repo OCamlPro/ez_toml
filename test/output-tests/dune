@@ -126,3 +126,50 @@
  (deps test3.toml.toml.json test3.json.expected)
  (action
   (diff test3.json.expected test3.toml.toml.json)))
+
+
+
+
+
+
+
+; test4.toml, test4.json.expected, test4.toml.toml.toml.expected
+
+(rule
+ (deps test4.toml)
+ (action
+ (with-stdout-to
+  test4.toml.json
+  (run ../../src/toml-check/main.exe --pedantic test4.toml))))
+
+(rule
+ (alias runtest)
+ (deps test4.toml.json test4.json.expected)
+ (action
+  (diff test4.json.expected test4.toml.json)))
+
+(rule
+ (deps test4.toml)
+ (action
+ (with-stdout-to
+  test4.toml.toml
+  (run ../../src/toml-check/main.exe --pedantic --to-toml test4.toml))))
+
+(rule
+ (alias runtest)
+ (deps test4.toml.toml test4.toml.toml.expected)
+ (action
+  (diff test4.toml.toml.expected test4.toml.toml)))
+
+(rule
+ (deps test4.toml.toml)
+ (action
+ (with-stdout-to
+  test4.toml.toml.json
+  (run ../../src/toml-check/main.exe test4.toml.toml))))
+
+(rule
+ (alias runtest)
+ (deps test4.toml.toml.json test4.json.expected)
+ (action
+  (diff test4.json.expected test4.toml.toml.json)))

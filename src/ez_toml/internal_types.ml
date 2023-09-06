@@ -47,6 +47,7 @@ type operation =
   | Set of inline_value binding
   | Table_item of key_path
   | Array_item of key_path
+  | Error_item of int
 
 type line = {
   line_comments_before : string list ;

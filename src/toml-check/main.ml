@@ -16,16 +16,24 @@ open Ez_file.V1
 open Ezcmd.V2
 open EZCMD.TYPES
 
-open Ez_toml.Types
+open Ez_toml.V1
+
+open TOML.Types
 
 
 let date_of_string s =
-  fst (ISO8601.Permissive.datetime_tz ~reqtime:false s)
+  try
+    fst (ISO8601.Permissive.datetime_tz ~reqtime:false s)
+  with exn ->
+    Printf.eprintf "date_of_string(%S) failed with exception %s\n%!"
+      s (Printexc.to_string exn);
+    exit 2
 
 let string_of_date float =
   ISO8601.Permissive.string_of_datetimezone (float, 0.)
 
-module TOML : sig
+(* Former TOML library *)
+module Toml : sig
 
   val of_table : table -> Toml.Types.table
   val to_table : Toml.Types.table -> table
@@ -89,7 +97,7 @@ end = struct
     let t = ref StringMap.empty in
     Table.iter (fun key v ->
         t := StringMap.add ( Table.Key.to_string key )
-            (Ez_toml.node (to_value v)) !t
+            (TOML.node (to_value v)) !t
       ) table ;
     !t
 
@@ -107,24 +115,24 @@ end = struct
     match t with
     | NodeEmpty -> [||]
     | NodeBool t ->
-        Array.of_list t |> Array.map (fun v -> Ez_toml.node @@ Bool v)
+        Array.of_list t |> Array.map (fun v -> TOML.node @@ Bool v)
     | NodeString t ->
-        Array.of_list t |> Array.map (fun v -> Ez_toml.node @@ String v)
+        Array.of_list t |> Array.map (fun v -> TOML.node @@ String v)
     | NodeInt t ->
         Array.of_list t |> Array.map (fun v ->
-            Ez_toml.node @@ Int ( string_of_int v))
+            TOML.node @@ Int ( string_of_int v))
     | NodeFloat t ->
         Array.of_list t |> Array.map (fun v ->
-            Ez_toml.node @@ Float ( string_of_float v))
+            TOML.node @@ Float ( string_of_float v))
     | NodeDate t ->
         Array.of_list t |> Array.map (fun v ->
-            Ez_toml.node @@ Date ( string_of_date v))
+            TOML.node @@ Date ( string_of_date v))
     | NodeTable t ->
         Array.of_list t |> Array.map (fun v ->
-            Ez_toml.node @@ Table ( to_table v))
+            TOML.node @@ Table ( to_table v))
     | NodeArray t ->
         Array.of_list t |> Array.map (fun v ->
-            Ez_toml.node @@ Array ( to_array v))
+            TOML.node @@ Array ( to_array v))
 
   let of_filename file =
     match Toml.Parser.from_filename file with
@@ -152,8 +160,22 @@ module JSON = struct
     match value with
     | String s -> `String s
     | Bool bool -> `Bool bool
-    | Float float -> `Float ( float_of_string float )
-    | Int int -> `Float (float_of_string int)
+    | Float float ->
+        begin try
+            `Float ( float_of_string float )
+          with _ ->
+            Printf.eprintf
+              "Warning: invalid float %S detected in JSON conversion\n%!" float;
+            `String (Printf.sprintf "INVALID FLOAT [%s]" float)
+        end
+    | Int int ->
+        begin try
+            `Float ( int_of_string int |> float_of_int )
+          with _ ->
+            Printf.eprintf
+              "Warning: invalid int %S detected in JSON conversion\n%!" int;
+            `String (Printf.sprintf "INVALID INT [%s]" int)
+        end
     | Date date -> `String date
     | Table table -> ( of_table table :> Ezjsonm.value )
     | Array array -> ( of_array array :> Ezjsonm.value )
@@ -175,19 +197,20 @@ module JSON = struct
     | `Null -> String "NULL"
     | `A list ->
         Array (List.map (fun value ->
-            Ez_toml.node @@ to_value value
+            TOML.node @@ to_value value
           ) list |> Array.of_list )
     | `O list ->
         let table = ref StringMap.empty in
         List.iter (fun ( key, value ) ->
             table := StringMap.add key
-                ( Ez_toml.node @@ to_value value ) !table
+                ( TOML.node @@ to_value value ) !table
           ) list ;
         Table !table
 
 end
 
 let () =
+  let pedantic = ref false in
   let use_current_parser = ref true in
   let use_current_printer = ref true in
   let output_format = ref JSON in
@@ -212,9 +235,14 @@ let () =
           match !input_format with
           | NONE | TOML ->
               if !use_current_parser then
-                Ez_toml.of_file file
+                let config = {
+                  TOML.default_config
+                  with
+                    pedantic = !pedantic }
+                in
+                TOML.of_file ~config file
               else
-                TOML.of_filename file
+                Toml.of_filename file
           | JSON ->
               let string = EzFile.read_file file in
               let json = Ezjsonm.from_string string in
@@ -230,16 +258,38 @@ let () =
               | TOML ->
                   let toml =
                     if !use_current_printer then
-                      Ez_toml.to_string table
+                      TOML.to_string table
                     else
-                      TOML.string_of_table table
+                      Toml.string_of_table table
                   in
                   output toml
               | NONE -> Printf.eprintf "File %S parsed\n%!" file
             end
-        | exception Error (loc, msg) ->
-            Printf.eprintf "Error at %s:\n" ( Ez_toml.string_of_location loc );
-            Printf.eprintf "%s%!" ( Ez_toml.string_of_error msg ) ;
+        | exception Error (loc, n, msg) ->
+            Printf.eprintf "%s:\nError %02d: %s\n%!"
+              ( TOML.string_of_location loc )
+              n
+              ( TOML.string_of_error msg ) ;
+
+            let ic = open_in loc.file in
+            let rec iter i =
+              match input_line ic with
+              | line ->
+                  if i >= loc.line_begin - 2 &&
+                     i <= loc.line_end + 2 then begin
+
+                    if i >= loc.line_begin && i <= loc.line_end then
+                      Printf.eprintf "%-4d > %s\n" i line
+                    else
+                      Printf.eprintf "%-4d   %s\n" i line;
+                    iter (i+1)
+                  end else
+                  if i < loc.line_begin then
+                    iter (i+1)
+              | exception _ -> ()
+            in
+            iter 1;
+            close_in ic;
             exit 2
       ) !files;
 
@@ -273,6 +323,9 @@ let () =
         [ "use-toml-printer" ], Arg.Unit (fun () ->
             use_current_printer := false),
         EZCMD.info "Use former toml library for printing";
+
+        [ "pedantic" ], Arg.Set pedantic,
+        EZCMD.info "Be as strictly compatible as possible";
 
       ]
 

@@ -103,11 +103,6 @@ c8281f46ba9a11d0b61bc8ef67eaa357:docs/style.css
 ae16b9e5a99efe0046fe5198271babc2:opam/ez_toml.opam
 # end context for opam/ez_toml.opam
 
-# begin context for opam/ez_toml_lib.opam
-# file opam/ez_toml_lib.opam
-06e70cc004f52b21e415ca247cbd0fcf:opam/ez_toml_lib.opam
-# end context for opam/ez_toml_lib.opam
-
 # begin context for opam/toml-check.opam
 # file opam/toml-check.opam
 48b10881e19d1711d52aedd44d39d19a:opam/toml-check.opam

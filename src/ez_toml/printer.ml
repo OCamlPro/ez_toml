@@ -13,7 +13,6 @@
 open EzCompat
 open Types
 
-
 (** Bare keys only allow [A-Za-z0-9_-]. *)
 let key_is_bare key =
   let len = String.length key in
@@ -48,6 +47,9 @@ let bprint_escape_char b char =
 let bprint_key_path b key_path =
   List.iteri (fun i key ->
       if i > 0 then Buffer.add_char b '.' ;
+      if key = "" then
+        Buffer.add_string b "''"
+      else
       if key_is_bare key then
         Buffer.add_string b key
       else
@@ -60,6 +62,11 @@ let bprint_key_path b key_path =
       else
         Printf.bprintf b "\"%s\"" key
     ) key_path
+
+let string_of_key_path key_path =
+  let b = Buffer.create 100 in
+  bprint_key_path b key_path ;
+  Buffer.contents b
 
 type context =
   | InsideTable
@@ -79,7 +86,9 @@ let split_table table =
         match node.node_value, node.node_format with
         | Table _, Any -> true
         | Array array, ( Any | Multiline )
-          when Array.for_all is_table_node array -> true
+          when
+            Array.length array > 0
+            && Array.for_all is_table_node array -> true
         | _ -> false
       in
       if is_section then
@@ -108,24 +117,24 @@ let rec extract_singleton key_path node =
         ( key_path, node )
   | _ -> ( key_path, node )
 
-let rec bprint_toplevel_table b table =
-  bprint_table b [] ( split_table table )
+let rec bprint_toplevel_table b config table =
+  bprint_table b config [] ( split_table table )
 
-and bprint_table b prefix (simple_values, sections) =
+and bprint_table b config prefix (simple_values, sections) =
 
   List.iter (fun (key,node) ->
       let key_path, node = extract_singleton [key] node in
-      bprint_comment_before b node ;
+      bprint_comment_before b config node ;
       bprint_key_path b key_path ;
       Printf.bprintf b " = ";
-      bprint_value b node.node_format InsideTable node.node_value ;
-      bprint_comment_after b node ;
+      bprint_value b config node.node_format InsideTable node.node_value ;
+      bprint_comment_after b config node ;
     ) simple_values ;
 
   List.iter (fun (key,node) ->
       match node.node_value with
       | Table table ->
-          bprint_comment_before b node ;
+          bprint_comment_before b config node ;
           let (simple_values,sections) = split_table table in
           let key_path = prefix @ [key] in
           begin
@@ -135,39 +144,43 @@ and bprint_table b prefix (simple_values, sections) =
                 Printf.bprintf b "[";
                 bprint_key_path b key_path;
                 Printf.bprintf b "]";
-                bprint_comment_after b node ;
+                bprint_comment_after b config node ;
           end;
-          bprint_table b key_path (simple_values, sections);
+          bprint_table b config key_path (simple_values, sections);
       | Array array ->
           let key_path = prefix @ [ key ] in
           Array.iter (fun node ->
-              bprint_comment_before b node ;
+              bprint_comment_before b config node ;
               Buffer.add_string b "[[";
               bprint_key_path b key_path ;
               Buffer.add_string b "]]";
-              bprint_comment_after b node ;
+              bprint_comment_after b config node ;
               let table = match node.node_value with
                 | Table table -> table
                 | _ -> assert false
               in
-              bprint_table b key_path ( split_table table )
+              bprint_table b config key_path ( split_table table )
             ) array
       | _ -> assert false
     ) sections ;
   ()
 
-and bprint_comment_before b node =
+and bprint_comment_before b config node =
   List.iter (fun line ->
-      Printf.bprintf b "#%s\n" line) node.node_comment_before
+      if line = "" then
+        Buffer.add_string b config.newline
+      else
+        Printf.bprintf b "#%s%s" line config.newline)
+    node.node_comment_before
 
-and bprint_comment_after b node =
+and bprint_comment_after b config node =
   begin match node.node_comment_after with
     | None -> ()
-    | Some comment -> Printf.bprintf  b"%s" comment
+    | Some comment -> Printf.bprintf  b" #%s" comment
   end;
-  Printf.bprintf b "\n"
+  Buffer.add_string b config.newline
 
-and bprint_value b format context value =
+and bprint_value b config format context value =
   match value with
   | Int int -> Buffer.add_string b int
   | Float float -> Buffer.add_string b float
@@ -189,7 +202,8 @@ and bprint_value b format context value =
           if i > 0 then Buffer.add_string b ", ";
           bprint_key_path b key_path ;
           Printf.bprintf b " = ";
-          bprint_value b node.node_format InsideInlineTable node.node_value ;
+          bprint_value b config
+            node.node_format InsideInlineTable node.node_value ;
         ) simple_values ;
       Printf.bprintf b " }"
   | Array array ->
@@ -202,7 +216,7 @@ and bprint_value b format context value =
       Printf.bprintf b "[ ";
       Array.iteri (fun i node ->
           if i > 0 then Buffer.add_string b ", ";
-          bprint_value b node.node_format
+          bprint_value b config node.node_format
             (if allow_multiline then
                InsideArray
              else
@@ -227,7 +241,7 @@ and bprint_value b format context value =
         | Multiline, InsideTable, true
           ->
             Buffer.add_string b {|"""|};
-            Buffer.add_char b '\n';
+            Buffer.add_string b config.newline;
             let rec iter nquotes value pos len =
               if pos < len then
                 let c = value.[pos] in
@@ -244,7 +258,7 @@ and bprint_value b format context value =
                     in
                     iter nquotes value (pos+1) len
                 | '\n' ->
-                    Buffer.add_char b '\n';
+                    Buffer.add_string b config.newline;
                     iter 0 value (pos+1) len
                 | c ->
                     bprint_escape_char b c;
@@ -254,7 +268,62 @@ and bprint_value b format context value =
             Buffer.add_string b {|"""|}
       end
 
-let string_of_table table =
+let string_of_table ?(config = Internal_misc.default_config) table =
   let b = Buffer.create 10000 in
-  bprint_toplevel_table b table ;
+  bprint_toplevel_table b config table ;
   Buffer.contents b
+
+let string_of_location loc =
+  Printf.sprintf "File %S, line %s, characters %s"
+    loc.file
+    ( if loc.line_begin = loc.line_end then
+        string_of_int loc.line_begin
+      else
+        Printf.sprintf "%d-%d" loc.line_begin loc.line_end )
+    ( if loc.char_begin = loc.char_end then
+        string_of_int loc.char_begin
+      else
+        Printf.sprintf "%d-%d" loc.char_begin loc.char_end )
+
+let rec string_of_error error =
+  match error with
+  | Parse_error -> "Parse error"
+  | Syntax_error msg -> Printf.sprintf "Syntax error: %s" msg
+  | Invalid_lookup ->
+      Printf.sprintf "Invalid lookup in something not a table"
+  | Invalid_lookup_in_inline_array ->
+      Printf.sprintf "Invalid lookup in inline array"
+  | Key_already_exists key_path ->
+      Printf.sprintf "Duplicate addition of key %S"
+        (string_of_key_path key_path )
+  | Invalid_key_set key ->
+      Printf.sprintf "Invalid: setting key %S in something not a table" key
+  | Invalid_table key_path ->
+      Printf.sprintf "Invalid: %S is not a table"
+        ( string_of_key_path key_path )
+  | Append_item_to_non_array key_path ->
+      Printf.sprintf
+        "Appending a table array item %S to a non-array"
+        ( string_of_key_path key_path )
+  | Append_item_to_non_table_array key_path ->
+      Printf.sprintf
+        "Appending a table array item %S to a non-table array"
+        ( string_of_key_path key_path )
+  | Invalid_escaped_unicode u ->
+      Printf.sprintf "Invalid escaped unicode \\u%s" u
+  | Expected_error_before_end_of_file n ->
+      Printf.sprintf "Expected error %d, but end of file found" n
+  | Expected_error_did_not_happen n ->
+      Printf.sprintf "Expected error %d, but no error happened on next line" n
+  | Expected_error_but_another_error (n, loc, nn, error) ->
+      Printf.sprintf "Expected error %d, but another error %d happened: %s at %s"
+        n nn ( string_of_error error ) ( string_of_location loc )
+  | Forbidden_escaped_character ->
+      "Forbidden escaped character"
+  | Unterminated_string ->
+      "Unterminated string"
+  | Control_characters_must_be_escaped _c ->
+      "Control characters in (U+0000 to U+001F) must be escaped"
+  | Duplicate_table_item key_path ->
+      Printf.sprintf "Duplicate table declaration %S"
+        ( string_of_key_path key_path )
