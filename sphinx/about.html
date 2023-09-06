@@ -5,8 +5,8 @@
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>About &mdash; ez_toml master
- (581b866
-) (2023/09/05 17:03) documentation</title>
+ (fe75a9d
+) (2023/09/06 22:26) documentation</title>
       <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="_static/css/fixes.css" type="text/css" />
@@ -32,7 +32,7 @@
           </a>
               <div class="version">
                 master
- (581b866
+ (fe75a9d
 )
               </div>
 <div role="search">
@@ -47,6 +47,9 @@
 <ul class="current">
 <li class="toctree-l1"><a class="reference external" href="https://ocamlpro.github.io/ez_toml">Home</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">About</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#toml-format">TOML Format</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#the-toml-check-tool">The toml-check tool</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#comparison-with-toml-opam-package">Comparison with Toml opam package</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#authors">Authors</a></li>
 </ul>
 </li>
@@ -86,6 +89,53 @@
 format. Compared to the toml library, it supports more features (mixed
 arrays for example), fixes a few bugs in the printer, and keeps better
 track of options order and comments in file.</p>
+<section id="toml-format">
+<h2>TOML Format<a class="headerlink" href="#toml-format" title="Permalink to this headline"></a></h2>
+<p>For a description of TOML, see <a class="reference external" href="https://toml.io/en/">https://toml.io/en/</a></p>
+</section>
+<section id="the-toml-check-tool">
+<h2>The toml-check tool<a class="headerlink" href="#the-toml-check-tool" title="Permalink to this headline"></a></h2>
+<p>The <code class="code docutils literal notranslate"><span class="pre">toml-check</span></code> tool is a very simple tool. It was initially
+designed to test the parser/printers of <code class="code docutils literal notranslate"><span class="pre">ez_toml</span></code>, but finally
+distributed as it could be useful on its own.</p>
+<p>The <code class="code docutils literal notranslate"><span class="pre">toml-check</span></code> tool can be used to check the syntax of a TOML
+file, to convert it to JSON, or to convert a JSON file to TOML
+(typically, if you have a doubt on how to express something in TOML).
+The tool uses <code class="code docutils literal notranslate"><span class="pre">ez_toml</span></code> to parse/print files, but can also be
+asked to use the former <code class="code docutils literal notranslate"><span class="pre">toml</span></code> library for comparison.</p>
+<p>For more information, use:</p>
+<div class="highlight-ocaml notranslate"><div class="highlight"><pre><span></span><span class="n">toml</span><span class="o">-</span><span class="n">check</span> <span class="o">--</span><span class="n">help</span>
+</pre></div>
+</div>
+</section>
+<section id="comparison-with-toml-opam-package">
+<h2>Comparison with Toml opam package<a class="headerlink" href="#comparison-with-toml-opam-package" title="Permalink to this headline"></a></h2>
+<p>Compared to the <code class="code docutils literal notranslate"><span class="pre">toml</span></code> opam package, <code class="code docutils literal notranslate"><span class="pre">ez_toml</span></code> contains
+the following improvements:</p>
+<ul class="simple">
+<li><p>Simpler interface: keys are simple <cite>string</cite> types instead of abstract</p></li>
+<li><p>More conservative interface: integers, floats and dates are not
+parsed. Instead, they are returned as simple <cite>string</cite> types that
+have to be processed by the user.</p></li>
+<li><p>Better support for TOML:</p>
+<ul>
+<li><p>Support for mixed arrays (the <code class="code docutils literal notranslate"><span class="pre">toml</span></code> library only allows
+monomorphic arrays)</p></li>
+<li><p>Support for hexa, octal and binary integer notations</p></li>
+</ul>
+</li>
+<li><p>Better pretty-printing:</p>
+<ul>
+<li><p>Pretty-prints definitions in the same order the order as they were
+read (the <code class="code docutils literal notranslate"><span class="pre">toml</span></code> library pretty-pretty only prints definitions
+in alphabetical order)</p></li>
+<li><p>Comments can be attached before and after definitions to be
+pretty-printed in the file. The parser will automatically attached
+such comments when definitions are read from a file.</p></li>
+</ul>
+</li>
+</ul>
+</section>
 <section id="authors">
 <h2>Authors<a class="headerlink" href="#authors" title="Permalink to this headline"></a></h2>
 <ul class="simple">
