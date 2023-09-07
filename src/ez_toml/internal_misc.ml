@@ -10,6 +10,7 @@
 (*                                                                        *)
 (**************************************************************************)
 
+open EzCompat
 open Types
 
 let noloc = { file = "";
@@ -21,9 +22,7 @@ let noloc = { file = "";
 let error ?(loc=noloc) n error = raise @@ Error ( loc, n, error )
 
 let default_config = {
-  allow_override = false ;
-  allow_extops = false ;
-  pedantic = false ;
+  silent_errors = IntSet.of_list [ 16 ] ;
   newline = "\n";
 }
 

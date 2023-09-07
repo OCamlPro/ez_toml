@@ -10,12 +10,10 @@
 (*                                                                        *)
 (**************************************************************************)
 
-open EzCompat
-
-val string_of_table :
-  ?config:Types.config ->
-  Types.node StringMap.t ->
-  string
+val string_of_node : ?config:Types.config ->
+  ?format : Types.format ->
+  ?context : Types.context ->
+  Types.node -> string
 
 val string_of_key_path : Types.key_path -> string
 

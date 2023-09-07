@@ -19,6 +19,7 @@ module TOML = struct
   open Types
 
   include Printer
+  include Accessors
 
   let default_config = Internal_misc.default_config
 
@@ -36,7 +37,11 @@ module TOML = struct
     try
       let lines = Parser.toml Lexer.tomlex lexbuf in
       (*      Internal.eprint_lines lines; *)
-      Internal_parsing.table_of_lines config lines
+      let loc = Internal_lexing.loc_of_lexbuf lexbuf in
+      let node = Internal_parsing.table_of_lines ~loc config lines in
+      let loc2 = Internal_lexing.loc_of_lexbuf lexbuf in
+      Internal_lexing.expand_loc loc loc2;
+      node
     with
     | Parser.Error ->
         let loc = Internal_lexing.loc_of_lexbuf lexbuf in
@@ -49,9 +54,9 @@ module TOML = struct
     let s = EzFile.read_file file in
     of_string ?config ~file s
 
-  let to_string table = Printer.string_of_table table
-  let to_file table file =
-    let s = to_string table in
+  let to_string node = Printer.string_of_node node
+  let to_file node file =
+    let s = to_string node in
     EzFile.write_file file s
 
   let noloc = Internal_misc.noloc

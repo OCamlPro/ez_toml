@@ -48,16 +48,31 @@ let error_lexbuf lexbuf n err =
 let loc pos txt = { loc = loc_of_pos pos  ; txt }
 
 let expand_loc l1 l2 =
-  { l1 with
-    line_end = l2.line_end ;
-    char_end = l2.char_end }
+  if l2.line_begin < l1.line_begin then begin
+    l1.line_begin <- l2.line_begin ;
+    l1.char_begin <- l2.char_begin;
+  end else
+  if l2.line_begin = l1.line_begin && l2.char_begin < l1.char_begin then
+    l1.char_begin <- l2.char_begin ;
+  if l2.line_end > l1.line_end then begin
+    l1.line_end <- l2.line_end ;
+    l1.char_end <- l2.char_end;
+  end else
+  if l2.line_end = l1.line_end && l2.char_end > l1.char_end then
+    l1.char_end <- l2.char_end ;
+  ()
+
+let merge_locs l1 l2 =
+  let l1 = { l1 with line_begin = l1.line_begin } in
+  expand_loc l1 l2;
+  l1
 
 let add_comment lexbuf s =
   let loc = loc_of_lexbuf lexbuf in
   begin
     match !last_line with
     | Some line ->
-        line.line_global_loc <- expand_loc line.line_global_loc loc ;
+        line.line_global_loc <- merge_locs line.line_global_loc loc ;
         line.line_comment_after <- Some s
     | None ->
         waiting_comments_rev := s :: !waiting_comments_rev;
@@ -92,7 +107,7 @@ let line pos operation =
     | None -> line_operation_loc
     | Some comment_loc ->
         waiting_loc := None ;
-        expand_loc comment_loc line_operation_loc
+        merge_locs comment_loc line_operation_loc
   in
   let line =
     {

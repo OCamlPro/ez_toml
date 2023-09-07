@@ -35,12 +35,8 @@ let string_of_date float =
 (* Former TOML library *)
 module Toml : sig
 
-  val of_table : table -> Toml.Types.table
-  val to_table : Toml.Types.table -> table
-
-  val string_of_table : table -> string
-
-  val of_filename : string -> table
+  val string_of_node : node -> string
+  val node_of_filename : string -> node
 
 end = struct
 
@@ -134,18 +130,25 @@ end = struct
         Array.of_list t |> Array.map (fun v ->
             TOML.node @@ Array ( to_array v))
 
-  let of_filename file =
+  let node_of_filename file =
     match Toml.Parser.from_filename file with
-    | `Ok table -> to_table table
+    | `Ok table -> TOML.node @@ Table ( to_table table )
     | `Error (msg, _loc) -> failwith msg
 
-  let string_of_table table =
-    Toml.Printer.string_of_table ( of_table table )
+  let string_of_node node =
+    match of_value node.node_value with
+    | TTable table -> Toml.Printer.string_of_table table
+    | value -> Toml.Printer.string_of_value value
 
 end
 type output_format = JSON | TOML | NONE
 
-module JSON = struct
+module JSON : sig
+
+  val of_node : node -> Ezjsonm.value
+  val to_node : Ezjsonm.value -> node
+
+end = struct
 
   let rec of_table table =
     let list = ref [] in
@@ -184,12 +187,9 @@ module JSON = struct
     let array = Array.map (fun node -> of_value node.node_value) array in
     `A ( Array.to_list array )
 
-  let rec to_table ( json : Ezjsonm.t ) =
-    match to_value ( json :> Ezjsonm.value ) with
-    | Table table -> table
-    | _ -> assert false
+  let of_node node = of_value node.node_value
 
-  and to_value json =
+  let rec to_value json =
     match json with
     | `Bool b -> Bool b
     | `String s -> String s
@@ -207,10 +207,13 @@ module JSON = struct
           ) list ;
         Table !table
 
+  let to_node json =
+    TOML.node @@ to_value json
+
 end
 
 let () =
-  let pedantic = ref false in
+  let silent_errors = ref TOML.default_config.silent_errors in
   let use_current_parser = ref true in
   let use_current_printer = ref true in
   let output_format = ref JSON in
@@ -238,29 +241,32 @@ let () =
                 let config = {
                   TOML.default_config
                   with
-                    pedantic = !pedantic }
+                    silent_errors = !silent_errors }
                 in
                 TOML.of_file ~config file
               else
-                Toml.of_filename file
+                Toml.node_of_filename file
           | JSON ->
               let string = EzFile.read_file file in
               let json = Ezjsonm.from_string string in
-              JSON.to_table json
+              JSON.to_node json
         with
         | table ->
             begin
               match !output_format with
               | JSON ->
-                  let json = JSON.of_table table in
-                  let s = Ezjsonm.to_string ~minify:false json in
+                  let json = JSON.of_node table in
+                  let s = match json with
+                    | `O _ as json -> Ezjsonm.to_string ~minify:false json
+                    | _ -> assert false
+                  in
                   output s
               | TOML ->
                   let toml =
                     if !use_current_printer then
                       TOML.to_string table
                     else
-                      Toml.string_of_table table
+                      Toml.string_of_node table
                   in
                   output toml
               | NONE -> Printf.eprintf "File %S parsed\n%!" file
@@ -317,15 +323,31 @@ let () =
             use_current_printer := false;
             use_current_parser := false),
         EZCMD.info "Use former toml library";
-        [ "use-toml-parser" ], Arg.Unit (fun () ->
-            use_current_parser := false),
+
+        [ "use-toml-parser" ], Arg.Unit (fun () -> use_current_parser := false),
         EZCMD.info "Use former toml library for parsing";
-        [ "use-toml-printer" ], Arg.Unit (fun () ->
-            use_current_printer := false),
+        [ "use-toml-printer" ], Arg.Unit (fun () -> use_current_printer := false),
         EZCMD.info "Use former toml library for printing";
 
-        [ "pedantic" ], Arg.Set pedantic,
-        EZCMD.info "Be as strictly compatible as possible";
+        [ "error" ], Arg.String (fun s ->
+            try
+              let len = String.length s in
+              if len < 2 then raise Exit;
+              if s.[0] <> 'E' then raise Exit;
+              let add = match s.[1] with
+                | '+' -> false
+                | '-' -> true
+                | _ -> raise Exit
+              in
+              let n = int_of_string ( String.sub s 2 (len-2) ) in
+              if add then
+                silent_errors := IntSet.add n !silent_errors
+              else
+                silent_errors := IntSet.remove n !silent_errors
+            with _ ->
+              Printf.eprintf "Error: invalid argument for --error 'E+/-NN'\n%!";
+              exit 2),
+        EZCMD.info ~docv:"ERROR" "Enable  (use 'E+NN') or disable (use 'E-NN') error NN";
 
       ]
 

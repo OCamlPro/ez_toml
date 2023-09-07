@@ -68,11 +68,6 @@ let string_of_key_path key_path =
   bprint_key_path b key_path ;
   Buffer.contents b
 
-type context =
-  | InsideTable
-  | InsideArray
-  | InsideInlineTable
-
 let is_table_node node =
   match node.node_value, node.node_format with
   | Table _, Any -> true
@@ -268,9 +263,19 @@ and bprint_value b config format context value =
             Buffer.add_string b {|"""|}
       end
 
-let string_of_table ?(config = Internal_misc.default_config) table =
+let string_of_node
+    ?(config = Internal_misc.default_config)
+    ?(format = Any)
+    ?(context = InsideTable)
+    node =
   let b = Buffer.create 10000 in
-  bprint_toplevel_table b config table ;
+  begin
+    match node.node_value, format, context with
+    | Table table, Any, InsideTable ->
+        bprint_toplevel_table b config table
+    | value, _, _->
+        bprint_value b config format context value
+  end;
   Buffer.contents b
 
 let string_of_location loc =
@@ -327,3 +332,16 @@ let rec string_of_error error =
   | Duplicate_table_item key_path ->
       Printf.sprintf "Duplicate table declaration %S"
         ( string_of_key_path key_path )
+  | Type_mismatch (node, expected) ->
+      Printf.sprintf "Type mismatch, expecting %s, found %s"
+        expected ( string_of_node node )
+  | Bad_convertion (node, expected) ->
+      Printf.sprintf "Bad convertion %s, found %s"
+        expected ( string_of_node node )
+  | Invalid_lookup_in_empty_array ->
+      "Invalid lookup in empty array"
+  | Key_already_exists_in_inline_table key_path ->
+      Printf.sprintf "Duplicate key %S in inline table"
+        (string_of_key_path key_path )
+  | Invalid_use_of_extension extension ->
+      Printf.sprintf "Invalid use of extension %S" extension

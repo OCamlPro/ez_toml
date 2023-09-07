@@ -19,18 +19,13 @@ let is_table_node node = match node.node_value with
   | Table _ -> true
   | _ -> false
 
-let default_config = {
-  allow_override = false ;
-  allow_extops = false ;
-  pedantic = false ;
-  newline = "\n";
-}
-
 let rec get_node_table ~loc node =
   match node.node_value with
   | Array array ->
       let len = Array.length array in
-      if len = 0 || node.node_format = Inline then
+      if len = 0 then
+        Internal_misc.error ~loc 19 Invalid_lookup_in_empty_array ;
+      if node.node_format = Inline then
         Internal_misc.error ~loc 3 Invalid_lookup_in_inline_array ;
       get_node_table ~loc array. ( len - 1 )
   | Table table -> node, table
@@ -40,9 +35,10 @@ let get_key ~loc node key =
   let _node, table = get_node_table ~loc node in
   StringMap.find key table
 
-let set_key ~loc config node key v =
+let set_key ~loc ~config node key v =
   let node, table = get_node_table ~loc node in
-  if not config.allow_override && StringMap.mem key table then
+  if not ( IntSet.mem 4 config.silent_errors )
+  && StringMap.mem key table then
     Internal_misc.error ~loc 4 ( Key_already_exists [ key ] ) ;
   node.node_value <- Table ( StringMap.add key v table )
 
@@ -53,24 +49,51 @@ let rec get_key_path ~loc node key_path =
       let node = get_key ~loc node key in
       get_key_path ~loc node key_path
 
-let rec set_key_path ~loc config table_node key_path ~value:v =
+let rec set_key_path ~loc ~config ?(op=OpEqual) table_node key_path ~value:v =
   match key_path with
   | [] -> assert false
   | [ key ] ->
       let table_node, table = get_node_table ~loc table_node in
-      if not config.allow_override && StringMap.mem key table then
-        Internal_misc.error ~loc 4 ( Key_already_exists key_path ) ;
-      table_node.node_value <- Table ( StringMap.add key v table )
+      let continue =
+        match op with
+        | OpEqual ->
+            if not ( IntSet.mem 4 config.silent_errors ) &&
+               StringMap.mem key table then
+              Internal_misc.error ~loc 4 ( Key_already_exists key_path ) ;
+            true
+        | OpInit -> not ( StringMap.mem key table )
+        | OpSet -> true
+        | OpUnset -> assert false
+      in
+      if continue then begin
+        table_node.node_value <- Table ( StringMap.add key v table );
+        Internal_lexing.expand_loc table_node.node_loc v.node_loc
+      end
   | key :: key_path ->
       let new_table_node = try
-          get_key ~loc table_node key
+          let node = get_key ~loc table_node key in
+          Internal_lexing.expand_loc node.node_loc v.node_loc ;
+          node
         with Not_found ->
           (*          Printf.eprintf "New table for %s\n%!" key; *)
           let new_node = Internal_misc.node ~loc @@ Table StringMap.empty in
-          set_key ~loc config table_node key new_node;
+          set_key ~loc ~config table_node key new_node;
           new_node
       in
-      set_key_path ~loc config new_table_node key_path ~value:v
+      set_key_path ~loc ~config ~op new_table_node key_path ~value:v
+
+
+let rec unset_key_path ~loc ~config table_node key_path =
+  match key_path with
+  | [] -> assert false
+  | [ key ] ->
+      let table_node, table = get_node_table ~loc table_node in
+      table_node.node_value <- Table ( StringMap.remove key table )
+  | key :: key_path ->
+      match get_key ~loc table_node key with
+      | exception Not_found -> ()
+      | new_table_node ->
+          unset_key_path ~loc ~config new_table_node key_path
 
 let rec table_mem_key_path ~loc table key_path =
   match key_path with
@@ -105,10 +128,13 @@ let rec node_of_inline config v =
           let v = bind.bind_val in
           begin match get_key_path ~loc:var.loc table_node var.txt with
             | exception Not_found -> ()
-            | _ -> Internal_misc.error ~loc 4 ( Key_already_exists var.txt );
+            | _ ->
+                if not ( IntSet.mem 20 config.silent_errors ) then
+                  Internal_misc.error ~loc 20
+                    ( Key_already_exists_in_inline_table var.txt );
           end;
           let v = node_of_inline config v in
-          set_key_path ~loc:var.loc config table_node var.txt ~value:v
+          set_key_path ~loc:var.loc ~config table_node var.txt ~value:v
         ) table ;
       table_node
 
@@ -143,8 +169,8 @@ let eprint_lines lines =
           Printf.eprintf "[!%d]\n%!" error
     ) lines
 
-let table_of_lines config lines =
-  let top_node = Internal_misc.node @@ Table StringMap.empty in
+let table_of_lines ~loc config lines =
+  let top_node = Internal_misc.node ~loc @@ Table StringMap.empty in
 
   let rec iter ( prefix : key_path ) lines =
     match lines with
@@ -158,23 +184,28 @@ let table_of_lines config lines =
             let array_node = try get_key_path ~loc top_node key_path with
               | Not_found ->
                   let array_node = line_node line key_path @@ Array [||] in
-                  set_key_path ~loc config top_node key_path ~value:array_node;
+                  set_key_path ~loc ~config top_node key_path ~value:array_node;
                   array_node
             in
             begin
               match array_node.node_value with
               | Array old_array ->
-                  if not ( Array.for_all is_table_node old_array ) then
-                    Internal_misc.error ~loc 8 ( Append_item_to_non_table_array key_path );
+                  if not ( IntSet.mem 8 config.silent_errors ) &&
+                     not ( Array.for_all is_table_node old_array ) then
+                    Internal_misc.error ~loc 8
+                      ( Append_item_to_non_table_array key_path );
 
                   array_node.node_value <-
                     Array ( Array.concat [ old_array ;
                                            [| table_node |] ] )
               | _ ->
-                  Internal_misc.error ~loc 7 ( Append_item_to_non_array key_path )
+                  Internal_misc.error ~loc 7
+                    ( Append_item_to_non_array key_path )
             end;
             iter key_path lines
         | Table_item [] ->
+            if not ( IntSet.mem 21 config.silent_errors ) then
+              Internal_misc.error ~loc 21 ( Invalid_use_of_extension "[]") ;
             iter [] lines
         | Table_item key_path ->
             begin
@@ -182,11 +213,11 @@ let table_of_lines config lines =
               | exception Not_found ->
                   let table_node =
                     line_node line key_path @@ Table StringMap.empty in
-                  set_key_path ~loc config top_node key_path ~value:table_node
+                  set_key_path ~loc ~config top_node key_path ~value:table_node
               | table_node ->
                   match table_node.node_value with
                   | Table _ ->
-                      if config.pedantic then
+                      if not ( IntSet.mem 16 config.silent_errors ) then
                         Internal_misc.error ~loc 16
                           ( Duplicate_table_item key_path )
                   | _ ->
@@ -195,12 +226,44 @@ let table_of_lines config lines =
             iter key_path lines
         | Set bind ->
             begin
+
+              begin
+                match bind.bind_op with
+                | OpEqual -> ()
+                | op ->
+                    if not ( IntSet.mem 21 config.silent_errors ) then
+                      Internal_misc.error ~loc 21
+                        ( Invalid_use_of_extension (match op with
+                              | OpInit -> "=="
+                              | OpSet -> ":="
+                              | OpUnset -> "-="
+                              | _ -> assert false)
+                            ) ;
+              end;
               let var = bind.bind_var in
               let v = bind.bind_val in
               let key_path = prefix @ var.txt in
-              let node = line_node line key_path
-                  ( node_of_inline config v ).node_value in
-              set_key_path ~loc config top_node key_path ~value:node
+              begin
+                match bind.bind_op with
+                | OpUnset ->
+                    let keys = match bind.bind_val.txt with
+                      | IString (_, s) -> [s]
+                      | IArray array ->
+                          List.map (function
+                                { txt = IString (_,s); _ } -> s
+                              | _ ->
+                                  failwith "-= expects an array of strings"
+                            ) array
+                      | _ -> failwith "-= expects an array of strings"
+                    in
+                    List.iter (fun key ->
+                        unset_key_path ~loc ~config top_node ( key_path @ [key])
+                      ) keys
+                | op ->
+                    let node = line_node line key_path
+                        ( node_of_inline config v ).node_value in
+                    set_key_path ~loc ~config ~op top_node key_path ~value:node
+              end
             end;
             iter prefix lines
         | Error_item n ->
@@ -221,6 +284,4 @@ let table_of_lines config lines =
                     iter prefix lines
   in
   iter [] lines;
-  match top_node.node_value with
-  | Table table -> table
-  | _ -> assert false
+  top_node

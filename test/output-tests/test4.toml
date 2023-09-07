@@ -477,7 +477,7 @@ shape = "round"
 [[fruitx]]  # parser must throw an error upon discovering that "fruit" is
            # an array rather than a table
 
-[!]
+[]
 
 # INVALID TOML DOC
 fruits3 = []

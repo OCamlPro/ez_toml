@@ -17,13 +17,11 @@ module TOML : sig
 
   val default_config : config
 
-  val of_string : ?file:string -> ?config:config -> string -> table
-  val of_file : ?config:config -> string -> table
+  val of_string : ?file:string -> ?config:config -> string -> node
+  val of_file : ?config:config -> string -> node
 
-  val to_string : table -> string
-  val to_file : table -> string -> unit
-
-  val string_of_error : error -> string
+  val to_string : node -> string
+  val to_file : node -> string -> unit
 
   (* useful to build values *)
 
@@ -33,6 +31,7 @@ module TOML : sig
     ?name:key_path -> ?after:string ->
     value -> node
 
-  val string_of_location : location -> string
+  include ( module type of Printer )
+  include ( module type of Accessors )
 
 end

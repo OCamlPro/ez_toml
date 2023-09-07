@@ -49,8 +49,14 @@ group_header:
    | LBRACK BANG INTEGER RBRACK               {
          Internal_lexing.line $sloc
                                @@ Error_item ( int_of_string $3 ) }
-   | LBRACK BANG RBRACK               {
+   | LBRACK RBRACK               {
          Internal_lexing.line $sloc @@ Table_item [] }
+   | LBRACE RBRACE CLEAR value_loc {
+     Internal_lexing.line $sloc @@ Set
+                                     { bind_var = Internal_lexing.loc $sloc [];
+                                       bind_op = OpUnset;
+                                       bind_val = $4 }
+       }
 
 key:
  | STRING_INLINE { snd $1 }
@@ -71,7 +77,6 @@ keysValue:
                                                { bind_var = $1 ;
                                                  bind_op = $2 ;
                                                  bind_val = $3 } }
-
 value:
     BOOL { IBool($1) }
   | INTEGER { IInt $1 }
