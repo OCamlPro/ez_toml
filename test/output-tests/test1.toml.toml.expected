@@ -1,84 +1,58 @@
 ################################################################################
-
 ## Comment
 
-
 # Speak your mind with the hash symbol. They go from the symbol to the end of
-
 # the line.
 
 
-
 ################################################################################
-
 ## Table
 
-
 # Tables (also known as hash tables or dictionaries) are collections of
-
 # key/value pairs. They appear in square brackets on a line by themselves.
 
+[table]
 
-
-[table] # Yeah, you can do this.
+key = "value" # Yeah, you can do this.
 
 # Nested tables are denoted by table names with dots in them. Name your tables
-
 # whatever crap you please, just don't use #, ., [ or ].
-
-
-key = "value"
 
 [table.subtable]
 
-# You don't need to specify all the super-tables if you don't want to. TOML
-
-# knows how to do it for you.
+key = "another value"
 
 
-# [x] you
+################################################################################
+## Inline Table
 
-# [x.y] don't
+# Inline tables provide a more compact syntax for expressing tables. They are
+# especially useful for grouped data that can otherwise quickly become verbose.
+# Inline tables are enclosed in curly braces `{` and `}`. No newlines are
+# allowed between the curly braces unless they are valid within a value.
 
-# [x.y.z] need these
-
-key = "another value" # for this to work
 
 [table.inline.name]
 first = "Tom"
 last = "Preston-Werner"
-
-
-################################################################################
-
-## String
-
-
-# There are four ways to express strings: basic, multi-line basic, literal, and
-
-# multi-line literal. All strings must contain only valid UTF-8 characters.
-
-
 [table.inline.point]
 x = 1
 y = 2
 
+# You don't need to specify all the super-tables if you don't want to. TOML
+# knows how to do it for you.
+
+# [x] you
+# [x.y] don't
+# [x.y.z] need these
+[x.y.z.w] # for this to work
+
 
 ################################################################################
+## String
 
-## Inline Table
-
-
-# Inline tables provide a more compact syntax for expressing tables. They are
-
-# especially useful for grouped data that can otherwise quickly become verbose.
-
-# Inline tables are enclosed in curly braces `{` and `}`. No newlines are
-
-# allowed between the curly braces unless they are valid within a value.
-
-
-[x.y.z.w]
+# There are four ways to express strings: basic, multi-line basic, literal, and
+# multi-line literal. All strings must contain only valid UTF-8 characters.
 
 [string.basic]
 
@@ -86,54 +60,40 @@ basic = """
 I'm a string. \"You can quote me\". Name\tJosé
 Location\tSF."""
 
-# The following strings are byte-for-byte equivalent:
-
 [string.multiline]
+
+# The following strings are byte-for-byte equivalent:
 key1 = """
 One
 Two"""
 key2 = """
 One
 Two"""
-
 key3 = """
 One
 Two"""
 
-# The following strings are byte-for-byte equivalent:
-
 [string.multiline.continued]
 
+# The following strings are byte-for-byte equivalent:
 key1 = "The quick brown fox jumps over the lazy dog."
 
 key2 = "The quick brown fox jumps over the lazy dog."
 
 key3 = "The quick brown fox jumps over the lazy dog."
 
-# What you see is what you get.
-
 [string.literal]
+
+# What you see is what you get.
 winpath = "C:\\Users\\nodejs\\templates"
 winpath2 = "\\\\ServerX\\admin$\\system32\\"
 quoted = "Tom \"Dubs\" Preston-Werner"
-
-
 regex = "<\\i\\c*\\s*>"
 
+
 [string.literal.multiline]
+
 regex2 = "I [dw]on't need \\d{2} apples"
-
-
-################################################################################
-
-## Integer
-
-
-# Integers are whole numbers. Positive numbers may be prefixed with a plus sign.
-
-# Negative numbers are prefixed with a minus sign.
-
-
 lines = """
 The first newline is
 trimmed in raw strings.
@@ -141,44 +101,45 @@ trimmed in raw strings.
    is preserved.
 """
 
+
+################################################################################
+## Integer
+
+# Integers are whole numbers. Positive numbers may be prefixed with a plus sign.
+# Negative numbers are prefixed with a minus sign.
+
 [integer]
+
 key1 = +99
 key2 = 42
 key3 = 0
-
 key4 = -17
 
-# For large numbers, you may use underscores to enhance readability. Each
-
-# underscore must be surrounded by at least one digit.
-
 [integer.underscores]
+
+# For large numbers, you may use underscores to enhance readability. Each
+# underscore must be surrounded by at least one digit.
 key1 = 1_000
-key2 = 5_349_221 # valid but inadvisable
+key2 = 5_349_221
+key3 = 1_2_3_4_5 # valid but inadvisable
 
 
 ################################################################################
-
 ## Float
 
-
 # A float consists of an integer part (which may be prefixed with a plus or
-
 # minus sign) followed by a fractional part and/or an exponent part.
 
-
-key3 = 1_2_3_4_5
-
 [float.fractional]
+
 key1 = +1.0
 key2 = 3.1415
-
 key3 = -0.01
 
 [float.exponent]
+
 key1 = 5e+22
 key2 = 1e6
-
 key3 = -2E-2
 
 [float.both]
@@ -186,81 +147,60 @@ key3 = -2E-2
 key = 6.626e-34
 
 [float.underscores]
+
 key1 = 9_224_617.445_991_228_313
+key2 = 1e1_000
 
 
 ################################################################################
-
 ## Boolean
-
 
 # Booleans are just the tokens you're used to. Always lowercase.
 
-
-key2 = 1e1_000
-
 [boolean]
+
 True = true
+False = false
 
 
 ################################################################################
-
 ## Datetime
-
 
 # Datetimes are RFC 3339 dates.
 
-
-False = false
-
 [datetime]
+
 key1 = 1979-05-27
 key2 = 1979-05-27T07:32:00Z
 key3 = 1979-05-27T00:32:00-07:00
-
-
-################################################################################
-
-## Array
-
-
-# Arrays are square brackets with other primitives inside. Whitespace is
-
-# ignored. Elements are separated by commas. Data types may not be mixed.
-
-
 key4 = 1979-05-27T00:32:00.999999-07:00
 
+
+################################################################################
+## Array
+
+# Arrays are square brackets with other primitives inside. Whitespace is
+# ignored. Elements are separated by commas. Data types may not be mixed.
+
 [array]
+
 key1 = [ 1, 2, 3 ]
 key2 = [ "red", "yellow", "green" ]
-key3 = [ [ 1, 2 ], [ 3, 4, 5 ] ] # this is ok
+key3 = [ [ 1, 2 ], [ 3, 4, 5 ] ]
+key4 = [ [ 1, 2 ], [ "a", "b", "c" ] ] # this is ok
 
 # Arrays can also be multiline. So in addition to ignoring whitespace, arrays
-
 # also ignore newlines between the brackets.  Terminating commas are ok before
-
 # the closing bracket.
 
-
-key4 = [ [ 1, 2 ], [ "a", "b", "c" ] ]
 key5 = [ 1, 2, 3 ]
-# this is ok
+key6 = [ 1, 2 ]
 
 
 ################################################################################
+## Array of Inline Tables
 
-## Array of Tables
-
-
-# These can be expressed by using a table name in double brackets. Each table
-
-# with the same double bracketed name will be an element in the array. The
-
-# tables are inserted in the order encountered.
-
-
-key6 = [ 1, 2 ]
+# Inline table syntax can be used in combination with array syntax.
 
 [[array.inline.points]]
 x = 1
@@ -275,48 +215,46 @@ x = 2
 y = 4
 z = 8
 
-[[products]]
-name = "Hammer"
 
+################################################################################
+## Array of Tables
+
+# These can be expressed by using a table name in double brackets. Each table
+# with the same double bracketed name will be an element in the array. The
+# tables are inserted in the order encountered.
+
+[[products]]
+
+name = "Hammer"
 sku = 738594937
 
 [[products]]
 
 [[products]]
+
 name = "Nail"
 sku = 284758393
+color = "gray"
 
 
 # You can create nested arrays of tables as well.
 
-
-color = "gray"
 [[fruit]]
-
 name = "apple"
+
 [fruit.physical]
 color = "red"
-
 shape = "round"
-[[fruit.variety]]
 
+[[fruit.variety]]
 name = "red delicious"
-[[fruit.variety]]
 
+[[fruit.variety]]
 name = "granny smith"
+
 [[fruit]]
-
 name = "banana"
+
 [[fruit.variety]]
-
-
-################################################################################
-
-## Array of Inline Tables
-
-
-# Inline table syntax can be used in combination with array syntax.
-
-
 name = "plantain"
 

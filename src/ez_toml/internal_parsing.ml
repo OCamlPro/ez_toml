@@ -154,135 +154,163 @@ let line_node line key_path v =
     ~name:key_path
     v
 
-let eprint_lines lines =
-  List.iter (fun line ->
-      match line.line_operation with
-      | Array_item key_path ->
-          Printf.eprintf "[[ %s ]]\n%!"
-            ( Internal_printer.string_of_key_path key_path )
-      | Table_item key_path ->
-          Printf.eprintf "[ %s ]\n%!"
-            ( Internal_printer.string_of_key_path key_path )
-      | Set bind ->
-          Printf.eprintf "%s = ...\n%!"
-            ( Internal_printer.string_of_key_path bind.bind_var.txt )
-      | Error_item error ->
-          Printf.eprintf "[!%d]\n%!" error
-    ) lines
+let eprint_comments comments =
+  List.iter (fun comment ->
+      if comment = "" then
+        Printf.eprintf "DEBUG \n"
+      else
+        Printf.eprintf "DEBUG %s\n" comment
+    ) comments
 
-let table_of_lines ~loc config lines =
-  let top_node = Internal_misc.node ~loc @@ Table StringMap.empty in
-
-  let rec iter ( prefix : key_path ) lines =
-    match lines with
-    | [] -> ()
-    | line :: lines ->
-        let loc = line.line_operation_loc in
+let eprint_lines (comments, lines) =
+  eprint_comments comments;
+  List.iter (fun (line, comments) ->
+      begin
         match line.line_operation with
         | Array_item key_path ->
-            let table_node =
-              line_node line key_path @@ Table StringMap.empty in
-            let array_node = try get_key_path ~loc top_node key_path with
-              | Not_found ->
-                  let array_node = line_node line key_path @@ Array [||] in
-                  set_key_path ~loc ~config top_node key_path ~value:array_node;
-                  array_node
-            in
-            begin
-              match array_node.node_value with
-              | Array old_array ->
-                  if not ( IntSet.mem 8 config.silent_errors ) &&
-                     not ( Array.for_all is_table_node old_array ) then
-                    Internal_misc.error ~loc 8
-                      ( Append_item_to_non_table_array key_path );
-
-                  array_node.node_value <-
-                    Array ( Array.concat [ old_array ;
-                                           [| table_node |] ] )
-              | _ ->
-                  Internal_misc.error ~loc 7
-                    ( Append_item_to_non_array key_path )
-            end;
-            iter key_path lines
-        | Table_item [] ->
-            if not ( IntSet.mem 21 config.silent_errors ) then
-              Internal_misc.error ~loc 21 ( Invalid_use_of_extension "[]") ;
-            iter [] lines
+            Printf.eprintf "DEBUG [[ %s ]]\n%!"
+              ( Internal_printer.string_of_key_path key_path )
         | Table_item key_path ->
-            begin
-              match get_key_path ~loc top_node key_path with
-              | exception Not_found ->
-                  let table_node =
-                    line_node line key_path @@ Table StringMap.empty in
-                  set_key_path ~loc ~config top_node key_path ~value:table_node
-              | table_node ->
-                  match table_node.node_value with
-                  | Table _ ->
-                      if not ( IntSet.mem 16 config.silent_errors ) then
-                        Internal_misc.error ~loc 16
-                          ( Duplicate_table_item key_path )
-                  | _ ->
-                      Internal_misc.error ~loc 6 ( Invalid_table key_path )
-            end;
-            iter key_path lines
+            Printf.eprintf "DEBUG [ %s ]\n%!"
+              ( Internal_printer.string_of_key_path key_path )
         | Set bind ->
-            begin
+            Printf.eprintf "DEBUG %s = ...\n%!"
+              ( Internal_printer.string_of_key_path bind.bind_var.txt )
+        | Error_item error ->
+            Printf.eprintf "DEBUG [!%d]\n%!" error
+      end;
+      eprint_comments comments;
+    ) lines
 
-              begin
-                match bind.bind_op with
-                | OpEqual -> ()
-                | op ->
-                    if not ( IntSet.mem 21 config.silent_errors ) then
-                      Internal_misc.error ~loc 21
-                        ( Invalid_use_of_extension (match op with
-                              | OpInit -> "=="
-                              | OpSet -> ":="
-                              | OpUnset -> "-="
-                              | _ -> assert false)
+let table_of_lines ~loc config (comments, lines) =
+  let top_node = Internal_misc.node ~loc @@ Table StringMap.empty in
+
+  let rec iter ( prefix : key_path ) before_comments lines =
+    match lines with
+    | [] -> ()
+    | (line, comments) :: lines ->
+        (*
+        Printf.eprintf "New line:\n";
+        eprint_lines ( [], [ line, comments ]);
+*)
+        match comments with
+        | [] -> assert false
+        | after_comment :: next_comments ->
+            line.line_comments_before <- before_comments ;
+            if after_comment <> "" then
+              line.line_comment_after <- Some after_comment;
+            let loc = line.line_operation_loc in
+            match line.line_operation with
+            | Array_item key_path ->
+                let array_node = try get_key_path ~loc top_node key_path with
+                  | Not_found ->
+                      let line_without_comments =
+                        { line with
+                          line_comments_before = [];
+                          line_comment_after = None } in
+                      let array_node = line_node line_without_comments
+                          key_path @@ Array [||] in
+                      set_key_path ~loc ~config top_node key_path ~value:array_node;
+                      array_node
+                in
+                begin
+                  match array_node.node_value with
+                  | Array old_array ->
+                      let table_node =
+                        line_node line key_path @@ Table StringMap.empty in
+
+                      if not ( IntSet.mem 8 config.silent_errors ) &&
+                         not ( Array.for_all is_table_node old_array ) then
+                        Internal_misc.error ~loc 8
+                          ( Append_item_to_non_table_array key_path );
+
+                      array_node.node_value <-
+                        Array ( Array.concat [ old_array ;
+                                               [| table_node |] ] )
+                  | _ ->
+                      Internal_misc.error ~loc 7
+                        ( Append_item_to_non_array key_path )
+                end;
+                iter key_path next_comments lines
+            | Table_item [] ->
+                if not ( IntSet.mem 21 config.silent_errors ) then
+                  Internal_misc.error ~loc 21 ( Invalid_use_of_extension "[]") ;
+                iter [] ( before_comments @ comments ) lines
+            | Table_item key_path ->
+                begin
+                  match get_key_path ~loc top_node key_path with
+                  | exception Not_found ->
+                      let table_node =
+                        line_node line key_path @@ Table StringMap.empty in
+                      set_key_path ~loc ~config top_node key_path ~value:table_node
+                  | table_node ->
+                      match table_node.node_value with
+                      | Table _ ->
+                          if not ( IntSet.mem 16 config.silent_errors ) then
+                            Internal_misc.error ~loc 16
+                              ( Duplicate_table_item key_path )
+                      | _ ->
+                          Internal_misc.error ~loc 6 ( Invalid_table key_path )
+                end;
+                iter key_path next_comments lines
+            | Set bind ->
+                begin
+
+                  begin
+                    match bind.bind_op with
+                    | OpEqual -> ()
+                    | op ->
+                        if not ( IntSet.mem 21 config.silent_errors ) then
+                          Internal_misc.error ~loc 21
+                            ( Invalid_use_of_extension (match op with
+                                  | OpInit -> "=="
+                                  | OpSet -> ":="
+                                  | OpUnset -> "-="
+                                  | _ -> assert false)
                             ) ;
-              end;
-              let var = bind.bind_var in
-              let v = bind.bind_val in
-              let key_path = prefix @ var.txt in
-              begin
-                match bind.bind_op with
-                | OpUnset ->
-                    let keys = match bind.bind_val.txt with
-                      | IString (_, s) -> [s]
-                      | IArray array ->
-                          List.map (function
-                                { txt = IString (_,s); _ } -> s
-                              | _ ->
-                                  failwith "-= expects an array of strings"
-                            ) array
-                      | _ -> failwith "-= expects an array of strings"
-                    in
-                    List.iter (fun key ->
-                        unset_key_path ~loc ~config top_node ( key_path @ [key])
-                      ) keys
-                | op ->
-                    let node = line_node line key_path
-                        ( node_of_inline config v ).node_value in
-                    set_key_path ~loc ~config ~op top_node key_path ~value:node
-              end
-            end;
-            iter prefix lines
-        | Error_item n ->
-            match lines with
-            | [] ->
-                Internal_misc.error ~loc 10
-                  ( Expected_error_before_end_of_file n )
-            | line :: lines ->
-                (* eprint_lines [ line ]; *)
-                match iter prefix [ line ] with
-                | () ->
-                    Internal_misc.error ~loc 11
-                      ( Expected_error_did_not_happen n )
-                | exception Error (loc, nn, error ) ->
-                    if n <> nn then
-                      Internal_misc.error ~loc 12
-                        ( Expected_error_but_another_error (n, loc, nn, error ));
-                    iter prefix lines
+                  end;
+                  let var = bind.bind_var in
+                  let v = bind.bind_val in
+                  let key_path = prefix @ var.txt in
+                  begin
+                    match bind.bind_op with
+                    | OpUnset ->
+                        let keys = match bind.bind_val.txt with
+                          | IString (_, s) -> [s]
+                          | IArray array ->
+                              List.map (function
+                                    { txt = IString (_,s); _ } -> s
+                                  | _ ->
+                                      failwith "-= expects an array of strings"
+                                ) array
+                          | _ -> failwith "-= expects an array of strings"
+                        in
+                        List.iter (fun key ->
+                            unset_key_path ~loc ~config top_node ( key_path @ [key])
+                          ) keys
+                    | op ->
+                        let node = line_node line key_path
+                            ( node_of_inline config v ).node_value in
+                        set_key_path ~loc ~config ~op top_node key_path ~value:node
+                  end
+                end;
+                iter prefix next_comments lines
+            | Error_item n ->
+                match lines with
+                | [] ->
+                    Internal_misc.error ~loc 10
+                      ( Expected_error_before_end_of_file n )
+                | (line, _) :: lines ->
+                    (* eprint_lines [ line ]; *)
+                    match iter prefix [] [ line, [ "" ] ] with
+                    | () ->
+                        Internal_misc.error ~loc 11
+                          ( Expected_error_did_not_happen n )
+                    | exception Error (loc, nn, error ) ->
+                        if n <> nn then
+                          Internal_misc.error ~loc 12
+                            ( Expected_error_but_another_error (n, loc, nn, error ));
+                        iter prefix [] lines
   in
-  iter [] lines;
+  iter [] comments lines;
   top_node

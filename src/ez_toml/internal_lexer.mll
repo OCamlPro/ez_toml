@@ -80,7 +80,7 @@ rule tomlex = parse
 | t_date as date { send @@ DATE date}
 | t_time as date { send @@ DATE date}
 | t_white+ { tomlex lexbuf }
-| t_eol { Internal_lexing.update_loc lexbuf;tomlex lexbuf }
+| t_eol { Internal_lexing.update_loc lexbuf; EOL }
 | '=' { send EQUAL }
 
 (* Only for Drom: we need to be able to combine values in templates *)
@@ -104,9 +104,7 @@ rule tomlex = parse
     multiline_literal_string (Buffer.create 13) lexbuf }
 | ',' { send COMMA }
 | '.' { send DOT }
-| '#' ( (_ # [ '\n' '\r' ] )* as comment )
-    { Internal_lexing.add_comment lexbuf comment;
-      tomlex lexbuf }
+| '#' ( (_ # [ '\n' '\r' ] )* as comment ) { COMMENT comment }
 | t_key as value {
     (* Printf.eprintf "KEY = %S\n%!" value; *)
     send @@ KEY value }

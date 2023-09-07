@@ -50,7 +50,7 @@ type operation =
   | Error_item of int
 
 type line = {
-  line_comments_before : string list ;
+  mutable line_comments_before : string list ;
   mutable line_comment_after : string option ;
   line_operation : operation ;
   line_operation_loc : location ;      (* location of only the op *)

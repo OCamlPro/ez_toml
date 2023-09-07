@@ -1,7 +1,28 @@
 
+# Extensions on operators
+
+[extensions]
+
 w = 1
 x = 2
-
-[z]
+[extensions.z]
 b = 1
+
+# Comments
+
+[comments]
+
+# This is a comment on field x
+
+x = 1
+
+# these two comments are separated
+
+# by an empty line
+
+y = 1
+
+# and finally, this field has both a comment before
+
+a = 1 # and after the definition
 

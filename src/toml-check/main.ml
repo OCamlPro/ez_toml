@@ -213,6 +213,7 @@ end = struct
 end
 
 let () =
+  let debug = ref false in
   let silent_errors = ref TOML.default_config.silent_errors in
   let use_current_parser = ref true in
   let use_current_printer = ref true in
@@ -241,6 +242,7 @@ let () =
                 let config = {
                   TOML.default_config
                   with
+                    debug = !debug;
                     silent_errors = !silent_errors }
                 in
                 TOML.of_file ~config file
@@ -328,6 +330,9 @@ let () =
         EZCMD.info "Use former toml library for parsing";
         [ "use-toml-printer" ], Arg.Unit (fun () -> use_current_printer := false),
         EZCMD.info "Use former toml library for printing";
+
+        [ "debug" ], Arg.Set debug,
+        EZCMD.info "Print additional debug info";
 
         [ "error" ], Arg.String (fun s ->
             try

@@ -45,6 +45,7 @@ type format =
   Default silent errors are: [ 16 ]
 *)
 type config = {
+  debug : bool ;
   silent_errors : IntSet.t ;
   newline : string ;      (* newline to be used *)
 }

@@ -22,6 +22,7 @@ let noloc = { file = "";
 let error ?(loc=noloc) n error = raise @@ Error ( loc, n, error )
 
 let default_config = {
+  debug = false ;
   silent_errors = IntSet.of_list [ 16 ] ;
   newline = "\n";
 }

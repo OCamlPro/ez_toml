@@ -27,19 +27,41 @@
 %token <string> KEY
 %token LBRACK RBRACK LBRACE RBRACE EOF COMMA DOT
 %token EQUAL INIT SET CLEAR
+%token <string> COMMENT
+%token EOL
 
 %start toml
 
-%type <Internal_types.line list> toml
+%type <string list * (
+        (Internal_types.line * string list) list)> toml
 
 %%
 (* Grammar rules *)
 toml:
- | keysValue* group* EOF
-   { $1 @ List.flatten $2 }
+ | maybe_eol keysValue_eol* group* EOF
+   { $1, ( $2 @ List.flatten $3 ) }
 
 group:
-   | group_header keysValue* { $1 :: $2 }
+   | group_header_eol keysValue_eol* { $1 :: $2 }
+ ;
+
+group_header_eol:
+  | group_header eol                 { ($1, $2) }
+;
+
+keysValue_eol:
+  | keysValue eol                  { ($1, $2) }
+;
+
+maybe_eol:
+  |                                { [] }
+  | eol                            { $1 }
+;
+
+eol:
+  | COMMENT EOL maybe_eol          { $1 :: $3 }
+  | EOL maybe_eol                  { "" :: $2 }
+;
 
 group_header:
    | LBRACK LBRACK key_path RBRACK RBRACK {
@@ -85,7 +107,7 @@ value:
   | STRING_MULTILINE { let (format, s) = $1 in IString(format,s) }
   | DATE { IDate $1 }
   | LBRACK RBRACK { IArray [] }
-  | LBRACK value_loc array_end { IArray ( $2 :: $3 ) }
+  | LBRACK maybe_eol value_loc_eol array_end { IArray ( $3 :: $4 ) }
   | LBRACE separated_list(COMMA,
                           keys_set_value) RBRACE { ITable $2 }
 
@@ -94,6 +116,11 @@ key_path_loc :
 
 value_loc:
   | value { Internal_lexing.loc $sloc $1 }
+ ;
+
+value_loc_eol:
+  | value_loc maybe_eol { $1 }
+ ;
 
 keys_set_value:
   | key_path_loc EQUAL value_loc   { { bind_var = $1 ;
@@ -101,7 +128,12 @@ keys_set_value:
                                        bind_val = $3 } }
 
 array_end:
-    COMMA value_loc array_end { $2 :: $3 }
-  | COMMA? RBRACK { [] }
+    comma_eol value_loc_eol array_end { $2 :: $3 }
+  | comma_eol? RBRACK { [] }
+ ;
+
+comma_eol:
+     COMMA maybe_eol { () }
+;
 
 %%

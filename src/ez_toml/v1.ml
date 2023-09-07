@@ -36,7 +36,7 @@ module TOML = struct
     end;
     try
       let lines = Internal_parser.toml Internal_lexer.tomlex lexbuf in
-      (*      Internal.eprint_lines lines; *)
+      if config.debug then Internal_parsing.eprint_lines lines;
       let loc = Internal_lexing.loc_of_lexbuf lexbuf in
       let node = Internal_parsing.table_of_lines ~loc config lines in
       let loc2 = Internal_lexing.loc_of_lexbuf lexbuf in

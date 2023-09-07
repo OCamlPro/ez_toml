@@ -34,8 +34,11 @@ let bprint_escape_char b char =
   match char with
   | '"' -> Buffer.add_string b "\\\""
   | '\\' -> Buffer.add_string b "\\\\"
-  | '\n' -> Buffer.add_string b "\\n"
+  | '\b' -> Buffer.add_string b "\\b"
   | '\t' -> Buffer.add_string b "\\t"
+  | '\n' -> Buffer.add_string b "\\n"
+  | '\012' -> Buffer.add_string b "\\f"
+  | '\r' -> Buffer.add_string b "\\r"
   | _ ->
     let code = Char.code char in
     if code <= 31 then
