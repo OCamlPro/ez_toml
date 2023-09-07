@@ -159,12 +159,13 @@ let eprint_lines lines =
       match line.line_operation with
       | Array_item key_path ->
           Printf.eprintf "[[ %s ]]\n%!"
-            ( Printer.string_of_key_path key_path )
+            ( Internal_printer.string_of_key_path key_path )
       | Table_item key_path ->
-          Printf.eprintf "[ %s ]\n%!" ( Printer.string_of_key_path key_path )
+          Printf.eprintf "[ %s ]\n%!"
+            ( Internal_printer.string_of_key_path key_path )
       | Set bind ->
           Printf.eprintf "%s = ...\n%!"
-            ( Printer.string_of_key_path bind.bind_var.txt )
+            ( Internal_printer.string_of_key_path bind.bind_var.txt )
       | Error_item error ->
           Printf.eprintf "[!%d]\n%!" error
     ) lines

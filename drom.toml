@@ -40,7 +40,7 @@ skip = [ "test/output-tests/dune" ,
 "test/expect-tests/test.ml" ,
 "test/inline-tests/dune" ,
 "test/inline-tests/test.ml" ,
-
+"sphinx/about.rst"
 ]
 
 # project-wide library dependencies (not for package-specific deps)

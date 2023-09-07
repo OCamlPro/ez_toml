@@ -31,7 +31,7 @@ module TOML : sig
     ?name:key_path -> ?after:string ->
     value -> node
 
-  include ( module type of Printer )
-  include ( module type of Accessors )
+  include ( module type of Internal_printer )
+  include ( module type of Internal_accessors )
 
 end

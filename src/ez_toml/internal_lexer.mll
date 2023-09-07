@@ -14,7 +14,7 @@
   (* Directly imported from toml.7.0.1 *)
 
   (*[@@@warning "-26"]*)
-open Parser
+open Internal_parser
     let send = Internal_lexing.send
 }
 
@@ -162,7 +162,7 @@ and string_common next buff = parse
   Buffer.add_string buff (Scanf.unescaped value);
   next buff lexbuf }
 | "\\u" (t_unicode as u) {
-  Buffer.add_string buff (Unicode.to_utf8 u);
+  Buffer.add_string buff (Internal_unicode.to_utf8 u);
   next buff lexbuf }
 | '\\' { Internal_lexing.error_lexbuf lexbuf 13 Forbidden_escaped_character }
 | eof  { Internal_lexing.error_lexbuf lexbuf 14 Unterminated_string }
