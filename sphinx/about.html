@@ -5,8 +5,8 @@
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>About &mdash; ez_toml master
- (4751f89
-) (2023/09/07 18:03) documentation</title>
+ (45ec04a
+) (2023/09/08 07:07) documentation</title>
       <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="_static/css/fixes.css" type="text/css" />
@@ -32,7 +32,7 @@
           </a>
               <div class="version">
                 master
- (4751f89
+ (45ec04a
 )
               </div>
 <div role="search">
@@ -50,6 +50,8 @@
 <li class="toctree-l2"><a class="reference internal" href="#toml-format">TOML Format</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#the-toml-check-tool">The toml-check tool</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#comparison-with-toml-opam-package">Comparison with Toml opam package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#ocaml-interface">OCaml Interface</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#supported-toml-extensions">Supported TOML Extensions</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#authors">Authors</a></li>
 </ul>
 </li>
@@ -134,6 +136,60 @@ pretty-printed in the file. The parser will automatically attached
 such comments when definitions are read from a file.</p></li>
 </ul>
 </li>
+</ul>
+</section>
+<section id="ocaml-interface">
+<h2>OCaml Interface<a class="headerlink" href="#ocaml-interface" title="Permalink to this headline"></a></h2>
+<p>A typical application using <code class="code docutils literal notranslate"><span class="pre">ez_toml</span></code> will begin with:</p>
+<div class="highlight-ocaml notranslate"><div class="highlight"><pre><span></span><span class="k">open</span> <span class="nn">Ez_toml</span><span class="p">.</span><span class="nc">V1</span>
+<span class="k">open</span> <span class="nn">TOML</span><span class="p">.</span><span class="nc">Types</span>
+</pre></div>
+</div>
+<p>The first line means that the application is using version 1 of the
+interface. Only the <code class="code docutils literal notranslate"><span class="pre">TOML</span></code> submodule is supposed to be used
+afterwards.</p>
+<p>The second line adds all the types manipulated in the <code class="code docutils literal notranslate"><span class="pre">TOML</span></code>
+module to the environment. This is useful to directly access labels
+and constructors. We advise not to open <code class="code docutils literal notranslate"><span class="pre">TOML</span></code> itself, and keep
+using qualified names for all its functions.</p>
+<p>The main type to be manipulated is <code class="code docutils literal notranslate"><span class="pre">node</span></code>. This type represents
+a value in the TOML file, either the complete configuration file
+itself, a section or a value assigned to a variable.</p>
+<p>The <code class="code docutils literal notranslate"><span class="pre">TOML</span></code> module defines functions to create nodes, to get and
+set values in tables, and to convert them to OCaml standard types.</p>
+<p>A lower-level interface is also available through the use of the
+<a href="#id1"><span class="problematic" id="id2">:type:`value`</span></a> type, that is stored in every <code class="code docutils literal notranslate"><span class="pre">node</span></code>. This
+<code class="code docutils literal notranslate"><span class="pre">value</span></code> type is harder to use, as integers, floats and dates are
+actually stored as strings inside, requiring conversions to use them.</p>
+</section>
+<section id="supported-toml-extensions">
+<h2>Supported TOML Extensions<a class="headerlink" href="#supported-toml-extensions" title="Permalink to this headline"></a></h2>
+<p>The <code class="code docutils literal notranslate"><span class="pre">ez_toml</span></code> library supports several extensions to the TOML
+format. These extensions are not “standard” in any form. Using them
+will, by default, trigger an error 21. Thus, applications wanting to
+use them should add 21 to the <code class="code docutils literal notranslate"><span class="pre">silent_errors</span></code> set of the
+<code class="code docutils literal notranslate"><span class="pre">config</span></code> parameter.</p>
+<p>The following extensions are available:</p>
+<ul class="simple">
+<li><p><code class="code docutils literal notranslate"><span class="pre">[]</span></code>: the empty section header is used to “re-open” the root
+section to add variables inside. Otherwise, it is not possible to
+extend the root section once another section/array has been opened.</p></li>
+<li><p><code class="code docutils literal notranslate"><span class="pre">[!number]</span></code>: this header means that the error code
+<code class="code docutils literal notranslate"><span class="pre">number</span></code> is expected to be triggered by the next line. This
+annotation is used to test that the parser correctly rejects some
+sentences in the testsuite. Not all errors can be tested this way.
+An error will be raised if no error happened, or if another error
+was triggered. Since an error happened, the next line will not
+be visible in the result of the parsing.</p></li>
+<li><p><code class="code docutils literal notranslate"><span class="pre">x</span> <span class="pre">==</span> <span class="pre">value</span></code>: Variable <code class="code docutils literal notranslate"><span class="pre">x</span></code> will only be set if it does
+not already exists. If it exists, no error will be raised and it
+will not be modified.</p></li>
+<li><p><code class="code docutils literal notranslate"><span class="pre">x</span> <span class="pre">:=</span> <span class="pre">value</span></code>: Variable <code class="code docutils literal notranslate"><span class="pre">x</span></code> will always be set, even if
+it already exists, without raising any error.</p></li>
+<li><p><code class="code docutils literal notranslate"><span class="pre">x</span> <span class="pre">-=</span> <span class="pre">[</span> <span class="pre">&quot;y&quot;</span> <span class="pre">]</span></code>: The sub-variable <code class="code docutils literal notranslate"><span class="pre">y</span></code> will be removed (if
+it exsists) from the table <code class="code docutils literal notranslate"><span class="pre">x</span></code>.</p></li>
+<li><p><code class="code docutils literal notranslate"><span class="pre">{}</span> <span class="pre">-=</span> <span class="pre">[</span> <span class="pre">&quot;y&quot;</span> <span class="pre">]</span></code>: The variable <code class="code docutils literal notranslate"><span class="pre">y</span></code> will be removed (if
+it exsists) from the root section.</p></li>
 </ul>
 </section>
 <section id="authors">
