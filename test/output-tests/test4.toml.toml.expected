@@ -20,7 +20,22 @@ key2 = "value"
 # TODO: we cannot test that this is incorrect
 # = "no key name"  # INVALID
 '' = "blank" # VALID but discouraged
+
+# JSON
+# {
+#  "name": "Orange",
+#  "physical": {
+#    "color": "orange",
+#    "shape": "round"
+#  },
+#  "site": {
+#    "google.com": true
+#  }
+# }
+
 name = "Orange"
+
+# THIS WILL NOT WORK
 spelling = "favorite"
 
 # TODO: these keys should be accepted, they are currently not
@@ -207,7 +222,10 @@ orange = 2
 # This defines the value of fruit.apple to be an integer.
 pomme = 1
 [fruit.apple]
+
+# This makes the key "fruit" into a table.
 smooth = true
+
 [fruit.apple.texture] # you can add sub-tables
 smooth = true
 
@@ -222,6 +240,9 @@ y = 2
 [fruit.apple.texture.animal.type]
 name = "pug"
 [apple]
+
+# VALID BUT DISCOURAGED
+
 type = "fruit"
 
 skin = "thin"
@@ -271,6 +292,9 @@ name = "pug"
 # [x.y] don't
 # [x.y.z] need these
 [x.y.z.w] # for this to work
+
+# DO NOT DO THIS
+
 [fruit2]
 apple = "red"
 orange = "orange"
@@ -335,6 +359,9 @@ edible = false # INVALID
 
 [product2.type]
 name = "Nail"
+
+# Array of Tables
+
 [[products3]]
 name = "Hammer"
 sku = 738594937
@@ -382,6 +409,7 @@ name = "apple"
 
 [[fruits.varieties]]
 name = "red delicious"
+
 [fruits.physical]
 color = "red"
 shape = "round"

@@ -302,7 +302,7 @@ let table_of_lines ~loc config (comments, lines) =
                 | [] ->
                     Internal_misc.error ~loc 10
                       ( Expected_error_before_end_of_file n )
-                | (line, _) :: lines ->
+                | (line, comments) :: lines ->
                     (* eprint_lines [ line ]; *)
                     match iter prefix []
                             [ line,
@@ -315,7 +315,7 @@ let table_of_lines ~loc config (comments, lines) =
                         if n <> nn then
                           Internal_misc.error ~loc 12
                             ( Expected_error_but_another_error (n, loc, nn, error ));
-                        iter prefix [] lines
+                        iter prefix ( List.tl comments ) lines
   in
   iter [] comments lines;
   top_node
