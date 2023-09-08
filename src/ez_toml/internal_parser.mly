@@ -32,8 +32,8 @@
 
 %start toml
 
-%type <string list * (
-        (Internal_types.line * string list) list)> toml
+%type <string Internal_types.loc list * (
+        (Internal_types.line * string Internal_types.loc list) list)> toml
 
 %%
 (* Grammar rules *)
@@ -59,11 +59,15 @@ maybe_eol:
 ;
 
 eol:
-  | COMMENT EOL maybe_eol          { $1 :: $3 }
-  | EOL maybe_eol                  { "" :: $2 }
+  | maybe_comment EOL maybe_eol          { $1 :: $3 }
 ;
 
-group_header:
+  maybe_comment:
+    | COMMENT                  { Internal_lexing.loc $sloc $1 }
+    |                          { Internal_lexing.loc $sloc "" }
+;
+
+  group_header:
    | LBRACK LBRACK key_path RBRACK RBRACK {
        Internal_lexing.line $sloc @@ Array_item $3 }
    | LBRACK key_path RBRACK               {

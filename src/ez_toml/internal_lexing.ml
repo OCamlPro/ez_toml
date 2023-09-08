@@ -14,21 +14,7 @@ open Types
 open Internal_types
 open Lexing
 
-(* These global values are used by the lexer. We could use a record to make
-   it multicore, but does ocamllex supports multicore ? *)
-let last_line = ref None
-let waiting_loc = ref None (* location of first waiting comment *)
-let waiting_comments_rev = ref []
-let empty_line = ref true
-
-let init () =
-  last_line := None ;
-  waiting_loc := None ;
-  waiting_comments_rev := []
-
-let send token = (* Use by the lexer to return any token to the parser *)
-  empty_line := false ;
-  token
+let init () = ()
 
 let loc_of_pos (begin_pos, end_pos) =
   {
@@ -67,32 +53,10 @@ let merge_locs l1 l2 =
   expand_loc l1 l2;
   l1
 
-let add_comment lexbuf s =
-  let loc = loc_of_lexbuf lexbuf in
-  begin
-    match !last_line with
-    | Some line ->
-        line.line_global_loc <- merge_locs line.line_global_loc loc ;
-        line.line_comment_after <- Some s
-    | None ->
-        waiting_comments_rev := s :: !waiting_comments_rev;
-        match !waiting_loc with
-        | None -> waiting_loc := Some loc
-        | Some _ -> ()
-  end;
-  ()
-
 (* The lexer calls this function everytime it finds a newline, to update
    the line counter of the location *)
-let update_loc ?(multiline=false) lexbuf =
+let update_loc lexbuf =
   let pos = lexbuf.lex_curr_p in
-  last_line := None ;
-  if !empty_line && not multiline && match !last_line with
-    | None -> true
-    | Some _ -> false then begin
-    add_comment lexbuf "";
-  end ;
-  empty_line := true ;
   lexbuf.lex_curr_p <- {
     pos with
     pos_lnum = pos.pos_lnum + 1;
@@ -100,23 +64,14 @@ let update_loc ?(multiline=false) lexbuf =
   }
 
 let line pos operation =
-  let line_comments_before = List.rev !waiting_comments_rev in
-  waiting_comments_rev := [] ;
   let line_operation_loc = loc_of_pos pos in
-  let line_global_loc = match !waiting_loc with
-    | None -> line_operation_loc
-    | Some comment_loc ->
-        waiting_loc := None ;
-        merge_locs comment_loc line_operation_loc
-  in
   let line =
     {
-      line_comments_before ;
+      line_comments_before = [] ;
       line_comment_after = None ;
       line_operation = operation ;
-      line_global_loc ;
+      line_global_loc = line_operation_loc;
       line_operation_loc ;
     }
   in
-  last_line := Some line ;
   line

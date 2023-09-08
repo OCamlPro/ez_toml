@@ -15,7 +15,6 @@
 
   (*[@@@warning "-26"]*)
 open Internal_parser
-    let send = Internal_lexing.send
 }
 
 let t_white   = ['\t' ' ']
@@ -70,104 +69,104 @@ let t_alphanum= t_alpha | t_digit
 let t_unicode = t_alphanum t_alphanum t_alphanum t_alphanum
 
 rule tomlex = parse
-| t_int as value   { send @@ INTEGER value}
-| t_hexa as value   { send @@ INTEGER value}
-| t_octal as value   { send @@ INTEGER value}
-| t_bits as value   { send @@ INTEGER value}
-| t_float as value   { send @@ FLOAT value }
-| t_float_sym as value   { send @@ FLOAT value }
-| t_bool as value  { send @@ BOOL (bool_of_string value) }
-| t_date as date { send @@ DATE date}
-| t_time as date { send @@ DATE date}
-| t_white+ { tomlex lexbuf }
-| t_eol { Internal_lexing.update_loc lexbuf; EOL }
-| '=' { send EQUAL }
+  | t_int as value   { INTEGER value}
+  | t_hexa as value   {  INTEGER value}
+  | t_octal as value   {  INTEGER value}
+  | t_bits as value   {  INTEGER value}
+  | t_float as value   {  FLOAT value }
+  | t_float_sym as value   {  FLOAT value }
+  | t_bool as value  {  BOOL (bool_of_string value) }
+  | t_date as date {  DATE date}
+  | t_time as date {  DATE date}
+  | t_white+ { tomlex lexbuf }
+  | t_eol { Internal_lexing.update_loc lexbuf; EOL }
+  | '=' { EQUAL }
 
-(* Only for Drom: we need to be able to combine values in templates *)
-| ":=" { send SET }
-| "==" { send INIT }
-| "-=" { send CLEAR }
-(* :Only for drom *)
+  (* Only for Drom: we need to be able to combine values in templates *)
+  | ":=" { SET }
+  | "==" { INIT }
+  | "-=" { CLEAR }
+  (* :Only for drom *)
 
-| '!' { send BANG }
-| '[' { send LBRACK }
-| ']' { send RBRACK }
-| '{' { send LBRACE }
-| '}' { send RBRACE }
-| '"' '"' '"' (t_eol? as eol) {
-    if eol <> "" then Internal_lexing.update_loc lexbuf ;
-    multiline_string (Buffer.create 13) lexbuf }
-| '"' { basic_string (Buffer.create 13) lexbuf }
-| '\'' { literal_string (Buffer.create 13) lexbuf }
-| "'''" (t_eol? as eol) {
-    if eol <> "" then Internal_lexing.update_loc lexbuf ;
-    multiline_literal_string (Buffer.create 13) lexbuf }
-| ',' { send COMMA }
-| '.' { send DOT }
-| '#' ( (_ # [ '\n' '\r' ] )* as comment ) { COMMENT comment }
-| t_key as value {
-    (* Printf.eprintf "KEY = %S\n%!" value; *)
-    send @@ KEY value }
-| eof   { send EOF }
+  | '!' { BANG }
+  | '[' { LBRACK }
+  | ']' { RBRACK }
+  | '{' { LBRACE }
+  | '}' { RBRACE }
+  | '"' '"' '"' (t_eol? as eol) {
+      if eol <> "" then Internal_lexing.update_loc lexbuf ;
+      multiline_string (Buffer.create 13) lexbuf }
+  | '"' { basic_string (Buffer.create 13) lexbuf }
+  | '\'' { literal_string (Buffer.create 13) lexbuf }
+  | "'''" (t_eol? as eol) {
+      if eol <> "" then Internal_lexing.update_loc lexbuf ;
+      multiline_literal_string (Buffer.create 13) lexbuf }
+  | ',' { COMMA }
+  | '.' { DOT }
+  | '#' ( (_ # [ '\n' '\r' ] )* as comment ) { COMMENT comment }
+  | t_key as value {
+      (* Printf.eprintf "KEY = %S\n%!" value; *)
+      KEY value }
+  | eof   { EOF }
 
 and literal_string buff = parse
-| '\''   { send @@ STRING_INLINE (Internal_types.Literal, Buffer.contents buff)}
-| _ as c {
-  Buffer.add_char buff c ;
-  literal_string buff lexbuf }
+  | '\''   {  STRING_INLINE (Internal_types.Literal, Buffer.contents buff)}
+  | _ as c {
+      Buffer.add_char buff c ;
+      literal_string buff lexbuf }
 
 and multiline_literal_string buff = parse
   | "'''" ( "'"* as extra)  {
       Buffer.add_string buff extra;
-      send @@ STRING_MULTILINE (Internal_types.LiteralMultiline,
-                               Buffer.contents buff)}
-| t_eol as eol {
-  Buffer.add_string buff eol ;
-  Internal_lexing.update_loc ~multiline:true lexbuf ;
-  multiline_literal_string buff lexbuf }
+      STRING_MULTILINE (Internal_types.LiteralMultiline,
+                        Buffer.contents buff)}
+  | t_eol as eol {
+      Buffer.add_string buff eol ;
+      Internal_lexing.update_loc lexbuf ;
+      multiline_literal_string buff lexbuf }
   | _ as c {
-  Buffer.add_char buff c ;
-  multiline_literal_string buff lexbuf }
+      Buffer.add_char buff c ;
+      multiline_literal_string buff lexbuf }
 
 and basic_string buff = parse
-| '"'  { send @@ STRING_INLINE (Internal_types.Quoted, Buffer.contents buff) }
-| ""   { string_common basic_string buff lexbuf }
+  | '"'  {  STRING_INLINE (Internal_types.Quoted, Buffer.contents buff) }
+  | ""   { string_common basic_string buff lexbuf }
 
 and multiline_string buff = parse
   | '"' '"' '"' ( '"'* as extra ) {
       Buffer.add_string buff extra;
-      send @@ STRING_MULTILINE (Internal_types.QuotedMultiline,
-                                            Buffer.contents buff) }
-| '\\' t_eol {
-  Internal_lexing.update_loc ~multiline:true lexbuf;
-  multiline_string_trim buff lexbuf }
-| t_eol as eol {
-  Internal_lexing.update_loc ~multiline:true lexbuf;
-  Buffer.add_string buff eol;
-  multiline_string buff lexbuf }
+      STRING_MULTILINE (Internal_types.QuotedMultiline,
+                        Buffer.contents buff) }
+  | '\\' t_eol {
+      Internal_lexing.update_loc lexbuf;
+      multiline_string_trim buff lexbuf }
+  | t_eol as eol {
+      Internal_lexing.update_loc lexbuf;
+      Buffer.add_string buff eol;
+      multiline_string buff lexbuf }
   | "" {
       string_common multiline_string buff lexbuf }
 
 and multiline_string_trim buff = parse
-| t_eol {
-  Internal_lexing.update_loc ~multiline:true lexbuf;
-  multiline_string_trim buff lexbuf }
-| t_white { multiline_string_trim buff lexbuf }
-| "" { multiline_string buff lexbuf }
+  | t_eol {
+      Internal_lexing.update_loc lexbuf;
+      multiline_string_trim buff lexbuf }
+  | t_white { multiline_string_trim buff lexbuf }
+  | "" { multiline_string buff lexbuf }
 
 and string_common next buff = parse
-| t_escape as value {
-  Buffer.add_string buff (Scanf.unescaped value);
-  next buff lexbuf }
-| "\\u" (t_unicode as u) {
-  Buffer.add_string buff (Internal_unicode.to_utf8 u);
-  next buff lexbuf }
-| '\\' { Internal_lexing.error_lexbuf lexbuf 13 Forbidden_escaped_character }
-| eof  { Internal_lexing.error_lexbuf lexbuf 14 Unterminated_string }
-| _ as c {
-  let code = Char.code c in
-  if code < 16 then
-    Internal_lexing.error_lexbuf lexbuf 15
-      ( Control_characters_must_be_escaped c );
-  Buffer.add_char buff c;
-  next buff lexbuf }
+  | t_escape as value {
+      Buffer.add_string buff (Scanf.unescaped value);
+      next buff lexbuf }
+  | "\\u" (t_unicode as u) {
+      Buffer.add_string buff (Internal_unicode.to_utf8 u);
+      next buff lexbuf }
+  | '\\' { Internal_lexing.error_lexbuf lexbuf 13 Forbidden_escaped_character }
+  | eof  { Internal_lexing.error_lexbuf lexbuf 14 Unterminated_string }
+  | _ as c {
+      let code = Char.code c in
+      if code < 16 then
+        Internal_lexing.error_lexbuf lexbuf 15
+          ( Control_characters_must_be_escaped c );
+      Buffer.add_char buff c;
+      next buff lexbuf }

@@ -155,7 +155,7 @@ let line_node line key_path v =
     v
 
 let eprint_comments comments =
-  List.iter (fun comment ->
+  List.iter (fun { txt = comment; _ } ->
       if comment = "" then
         Printf.eprintf "DEBUG \n"
       else
@@ -182,6 +182,8 @@ let eprint_lines (comments, lines) =
       eprint_comments comments;
     ) lines
 
+let txt { txt ; _ } = txt
+
 let table_of_lines ~loc config (comments, lines) =
   let top_node = Internal_misc.node ~loc @@ Table StringMap.empty in
 
@@ -196,9 +198,9 @@ let table_of_lines ~loc config (comments, lines) =
         match comments with
         | [] -> assert false
         | after_comment :: next_comments ->
-            line.line_comments_before <- before_comments ;
-            if after_comment <> "" then
-              line.line_comment_after <- Some after_comment;
+            line.line_comments_before <- List.map txt before_comments ;
+            if after_comment.txt <> "" then
+              line.line_comment_after <- Some after_comment.txt;
             let loc = line.line_operation_loc in
             match line.line_operation with
             | Array_item key_path ->
@@ -302,7 +304,10 @@ let table_of_lines ~loc config (comments, lines) =
                       ( Expected_error_before_end_of_file n )
                 | (line, _) :: lines ->
                     (* eprint_lines [ line ]; *)
-                    match iter prefix [] [ line, [ "" ] ] with
+                    match iter prefix []
+                            [ line,
+                              [ { txt = "" ; loc =
+                                               Internal_misc.noloc } ] ] with
                     | () ->
                         Internal_misc.error ~loc 11
                           ( Expected_error_did_not_happen n )
