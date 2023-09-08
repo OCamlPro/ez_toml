@@ -44,3 +44,21 @@
   
   a = 1 # and after the definition
   
+
+  $ dune exec -- toml-check --error E-21 --to-toml test3.toml > test3.toml.toml && dune exec -- toml-check --error E-21 test3.toml.toml
+  Parsing "test3.toml"
+  Parsing "test3.toml.toml"
+  {
+    "comments": {
+      "a": 1,
+      "x": 1,
+      "y": 1
+    },
+    "extensions": {
+      "w": 1,
+      "x": 2,
+      "z": {
+        "b": 1
+      }
+    }
+  }
