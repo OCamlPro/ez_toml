@@ -27,7 +27,7 @@ functions in `TOML`.
 To use the following script, just rename it as `top.ml` in the source
 directory of `ez_toml`, start `ocaml` and type `#use "top.ml";;`:
 
-```
+```ocaml
 #directory "_opam/lib/ocplib_stuff";;
 #directory "_opam/lib/ISO8601";;
 #directory "_opam/lib/re";;
