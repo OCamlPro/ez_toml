@@ -5,7 +5,7 @@ version:0.9.0
 
 # hash of toml configuration files
 # used for generation of all files
-df41a95646a259fa4d3211ce15e2875b:.
+71f77aae5f5c9aee578438f01be3a4d6:.
 # end context for .
 
 # begin context for .github/workflows/workflow.yml
@@ -40,7 +40,7 @@ db0126b9266fcb9955cd5a9b69b0da2a:CHANGES.md
 
 # begin context for LICENSE.md
 # file LICENSE.md
-e31b19b601ab25353ef16d67127735f1:LICENSE.md
+8fc45323c2500fb66e52deb392dda4f2:LICENSE.md
 # end context for LICENSE.md
 
 # begin context for Makefile
@@ -155,7 +155,7 @@ de4bda9e0b474977e6ff7357fd8afefa:sphinx/about.rst
 
 # begin context for sphinx/license.rst
 # file sphinx/license.rst
-7f09d28eb87ab9f2650899f85835e74a:sphinx/license.rst
+8f504f01aea592543c0a662b81169d91:sphinx/license.rst
 # end context for sphinx/license.rst
 
 # begin context for src/ez_toml/dune
@@ -212,8 +212,3 @@ dc8d6157230e9ef8e965865f990fbc49:test/output-tests/test1.expected
 # file test/output-tests/test2.expected
 ee63957b3b77455a12e6c269a5032c3f:test/output-tests/test2.expected
 # end context for test/output-tests/test2.expected
-
-# begin context for test/output-tests/test2.ml
-# file test/output-tests/test2.ml
-e8eaab7626ef0aace5e570fffe81f869:test/output-tests/test2.ml
-# end context for test/output-tests/test2.ml

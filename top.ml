@@ -1,33 +1,4 @@
 
-[![Actions Status](https://github.com/ocamlpro/ez_toml/workflows/Main%20Workflow/badge.svg)](https://github.com/ocamlpro/ez_toml/actions)
-[![Release](https://img.shields.io/github/release/ocamlpro/ez_toml.svg)](https://github.com/ocamlpro/ez_toml/releases)
-
-# ez_toml
-
-This ez_toml library is a small library to read and write files in TOML
-format. Compared to the toml library, it supports more features (mixed
-arrays for example), fixes a few bugs in the printer, and keeps better
-track of options order and comments in file.
-
-* Website: https://ocamlpro.github.io/ez_toml
-* General Documentation: https://ocamlpro.github.io/ez_toml/sphinx
-* API Documentation: https://ocamlpro.github.io/ez_toml/doc
-* Sources: https://github.com/ocamlpro/ez_toml
-
-## Basic Example
-
-You will need to open `Ez_toml.V1`, then you have access to:
-
-* `TOML` submodule: contains all the interesting functions
-* `TOML.Types` submodule: contains all the type declarations
-
-Usually, you should open `TOML.Types` and use qualified names to access
-functions in `TOML`.
-
-To use the following script, just rename it as `top.ml` in the source
-directory of `ez_toml`, start `ocaml` and type `#use "top.ml";;`:
-
-```ocaml
 #directory "_opam/lib/ocplib_stuff";;
 #directory "_opam/lib/ISO8601";;
 #directory "_opam/lib/re";;
@@ -92,20 +63,13 @@ let () =
      ~value:(TOML.int 0)
 ;;
 
+let () =
+  TOML.set ~config t ["other"; "counters"; "recorded_crashes"]
+     ~value:(TOML.int 0)
+;;
+
 (* Print it back to a string *)
 let s = TOML.to_string t
 ;;
 
 (* val s : string = "\n[settings.basic]\ncrash_randomly = 0\n" *)
-
-```
-
-## Tests example
-
-Check file `src/toml-check/tests.ml` for another example of simple
-accesses and modifications of the TOML datastructure.
-
-
-
-
-

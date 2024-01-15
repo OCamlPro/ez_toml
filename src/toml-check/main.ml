@@ -321,6 +321,9 @@ let () =
         [ "o" ], Arg.String (fun s -> output_file := Some s),
         EZCMD.info ~docv:"FILE" "Output format to FILE (default is stdout)";
 
+        [ "run-tests" ], Arg.Unit Tests.run_and_exit,
+        EZCMD.info "Run simple tests and exit";
+
         [ "use-toml" ], Arg.Unit (fun () ->
             use_current_printer := false;
             use_current_parser := false),

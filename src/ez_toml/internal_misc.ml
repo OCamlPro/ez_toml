@@ -29,14 +29,19 @@ let default_config = {
 
 let node_counter = ref 0
 let node ?(format=Any) ?(loc=noloc)
-    ?(before=[]) ?(name=["???"]) ?after
+    ?(before=[]) ?(name=["???"]) ?after ?pos
     value =
-  incr node_counter;
+  let node_pos = match pos with
+    | None ->
+      incr node_counter;
+      !node_counter
+    | Some pos -> pos
+  in
   { node_loc = loc ;
     node_comment_before = before;
     node_comment_after = after;
     node_value = value ;
     node_format = format ;
-    node_pos = !node_counter;
+    node_pos;
     node_name = name;
   }
