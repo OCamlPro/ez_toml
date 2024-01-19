@@ -233,7 +233,9 @@ sf3 = -inf # negative infinity
 # not a number
 sf4 = nan  # actual sNaN/qNaN encoding is implementation-specific
 sf5 = +nan # same as `nan`
-sf6 = -nan # valid, actual encoding is implementation-specific
+
+# Commented because differs on Macosx
+# sf6 = -nan # valid, actual encoding is implementation-specific
 
 # Boolean
 
